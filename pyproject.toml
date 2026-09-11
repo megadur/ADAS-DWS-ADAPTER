@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pharmacy-bridge"
+version = "1.0.0"
+description = "Apotheken Home Assistant MQTT Adapter für WWKS2 und ADAS-DWS"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "paho-mqtt>=1.6.1",
+]
+
+[project.scripts]
+pharmacy-bridge = "pharmacy_bridge.service:main"
+pharmacy-simulator = "pharmacy_bridge.simulator:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

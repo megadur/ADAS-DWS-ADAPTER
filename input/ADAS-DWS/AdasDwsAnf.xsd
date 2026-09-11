@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://www.adas.de/spec/dws/v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.adas.de/spec/dws/v1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0">
+	<xs:annotation>
+		<xs:documentation>ADAS-DataWarehouse-Schnittstelle Anfrage - Version 1.0</xs:documentation>
+	</xs:annotation>
+	<xs:include schemaLocation="AdasDwsTypes.xsd"/>
+	<xs:element name="adwsanf">
+		<xs:annotation>
+			<xs:documentation>Root-Element</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="kopf" type="Kopf"/>
+				<xs:element name="gueltig" type="xs:boolean" default="1">
+					<xs:annotation>
+						<xs:documentation>Gültigkeitshinweis, vom Absender immer auf true (1) zu setzen. Wird bei semantisch ungültiger Anfragen vom Empfänger auf false (0) gesetzt und zurückgeschickt.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="verkauf" type="AnfrageBasis"/>
+				<xs:element name="wareneingang" type="AnfrageBasis"/>
+				<xs:element name="retoure" type="AnfrageBasis"/>
+				<xs:element name="neinverkauf" type="AnfrageBasis"/>
+				<xs:element name="lager" type="AnfrageBasis"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

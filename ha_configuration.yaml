@@ -1,0 +1,90 @@
+# Home Assistant Example Configuration for Pharmacy KPIs
+# Note: When using the Pharmacy Adapter Bridge with MQTT Auto-Discovery,
+# these entities will be created automatically in Home Assistant.
+# This file serves as a reference for manual YAML setups or custom template sensors.
+
+mqtt:
+  binary_sensor:
+    - name: "Kommissionierer Online"
+      unique_id: ks01_online
+      state_topic: "pharmacy/ks01/availability"
+      payload_on: "online"
+      payload_off: "offline"
+      device_class: connectivity
+
+  sensor:
+    - name: "Kommissionierer Status"
+      unique_id: ks01_state
+      state_topic: "pharmacy/ks01/metrics"
+      value_template: "{{ value_json.state }}"
+      availability_topic: "pharmacy/ks01/availability"
+
+    - name: "Auslagerungen Heute"
+      unique_id: ks01_outputs_today
+      state_topic: "pharmacy/ks01/metrics"
+      value_template: "{{ value_json.outputs_today }}"
+      unit_of_measurement: "Packungen"
+      state_class: measurement
+
+    - name: "Auslagerungsdauer 1h"
+      unique_id: ks01_avg_output_time_1h
+      state_topic: "pharmacy/ks01/metrics"
+      value_template: "{{ value_json.avg_output_time_s_1h }}"
+      unit_of_measurement: "s"
+      device_class: duration
+      state_class: measurement
+
+    - name: "Fehlerquote 24h"
+      unique_id: ks01_error_rate_24h
+      state_topic: "pharmacy/ks01/metrics"
+      value_template: "{{ value_json.error_rate_24h_pct }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+
+    - name: "WWS Verkäufe Heute"
+      unique_id: pharmacy_dws_sales_today
+      state_topic: "pharmacy/dws/metrics"
+      value_template: "{{ value_json.total_sales_count }}"
+      unit_of_measurement: "Bons"
+      state_class: measurement
+
+    - name: "WWS Lagerbestand"
+      unique_id: pharmacy_dws_stock_packs
+      state_topic: "pharmacy/dws/metrics"
+      value_template: "{{ value_json.total_stock_packs }}"
+      unit_of_measurement: "Packungen"
+      state_class: measurement
+
+    - name: "Verfall in 90 Tagen"
+      unique_id: pharmacy_dws_expiring_90d
+      state_topic: "pharmacy/dws/metrics"
+      value_template: "{{ value_json.expiring_90d_count }}"
+      unit_of_measurement: "Artikel"
+      state_class: measurement
+
+# Utility Meter for daily/monthly tracking
+utility_meter:
+  ks_outputs_daily:
+    source: sensor.auslagerungen_heute
+    cycle: daily
+  ks_outputs_monthly:
+    source: sensor.auslagerungen_heute
+    cycle: monthly
+
+# Alarm Automation Example
+automation:
+  - alias: "Kommissionierer Störungsmeldung"
+    id: ks01_fault_alert
+    trigger:
+      - trigger: template
+        value_template: "{{ states('sensor.kommissionierer_status') != 'Ready' }}"
+        for: "00:05:00"
+    condition:
+      - condition: state
+        entity_id: binary_sensor.kommissionierer_online
+        state: "on"
+    action:
+      - action: persistent_notification.create
+        data:
+          title: "Kommissionierer prüfen"
+          message: "Der Kommissionierer befindet sich seit > 5 Minuten im Status: {{ states('sensor.kommissionierer_status') }}."

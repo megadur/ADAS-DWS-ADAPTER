@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://www.adas.de/spec/dws/v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.adas.de/spec/dws/v1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0">
+	<xs:annotation>
+		<xs:documentation>ADAS-DataWarehouse-Schnittstelle Datenlieferung Ausbaustufe 2 - Version 1.0</xs:documentation>
+	</xs:annotation>
+	<xs:include schemaLocation="AdasDwsTypes.xsd"/>
+	<xs:element name="adwsroot">
+		<xs:annotation>
+			<xs:documentation>Root-Element</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="kopf" type="Kopf"/>
+				<xs:element name="verkaufsblock">
+					<xs:annotation>
+						<xs:documentation>Element für die Verkaufsdaten in Ausbaustufe 2</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:choice maxOccurs="unbounded">
+							<xs:element name="total" type="Total"/>
+							<xs:element name="keineDaten" type="KeineDatenBasis"/>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="wareneingangsblock">
+					<xs:annotation>
+						<xs:documentation>Element für die Wareneingangsdaten in Ausbaustufe 2</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:choice maxOccurs="unbounded">
+							<xs:element name="wareneingang" type="Wareneingang"/>
+							<xs:element name="keineDaten" type="KeineDatenBasis"/>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="lagerblock">
+					<xs:annotation>
+						<xs:documentation>Element für die Lagerdaten in Ausbaustufe 2</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:choice maxOccurs="unbounded">
+							<xs:element name="lager" type="Lager"/>
+							<xs:element name="keineDaten" type="KeineDatenBasis"/>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="Total">
+		<xs:annotation>
+			<xs:documentation>Typ für das Total in Ausbaustufe 2</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="TotalBasis">
+				<xs:sequence>
+					<xs:element name="subtotal" type="Subtotal" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="Subtotal">
+		<xs:annotation>
+			<xs:documentation>Typ für das Subtotal in Ausbaustufe 2</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="SubtotalBasisMitPerson">
+				<xs:sequence>
+					<xs:element name="subtotalzeile" type="Subtotalzeile" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="Subtotalzeile">
+		<xs:annotation>
+			<xs:documentation>Typ für die Subtotalzeile in Ausbaustufe 2</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="SubtotalzeileBasis"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="Wareneingang">
+		<xs:annotation>
+			<xs:documentation>Typ für den Wareneingang in Ausbaustufe 2</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="WareneingangBasis">
+				<xs:sequence>
+					<xs:element name="wareneingangszeile" type="Wareneingangszeile" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="Wareneingangszeile">
+		<xs:annotation>
+			<xs:documentation>Typ für die Wareneingangszeile in Ausbaustufe 2</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="WareneingangszeileBasis"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="Lager">
+		<xs:annotation>
+			<xs:documentation>Typ für das Lager in Ausbaustufe 2</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="LagerBasis">
+				<xs:sequence>
+					<xs:element name="lagerzeile" type="Lagerzeile" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="Lagerzeile">
+		<xs:annotation>
+			<xs:documentation>Typ für die Lagerzeile in Ausbaustufe 2</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="LagerzeileBasis"/>
+		</xs:complexContent>
+	</xs:complexType>
+</xs:schema>

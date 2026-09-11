@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://www.adas.de/spec/dws/v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.adas.de/spec/dws/v1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0">
+	<xs:annotation>
+		<xs:documentation>ADAS-DataWarehouse-Schnittstelle Datenlieferung Ausbaustufe 1 - Version 1.0</xs:documentation>
+	</xs:annotation>
+	<xs:include schemaLocation="AdasDwsTypes.xsd"/>
+	<xs:element name="adwsroot">
+		<xs:annotation>
+			<xs:documentation>Root-Element</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="kopf" type="Kopf"/>
+				<xs:element name="verkaufsblock">
+					<xs:annotation>
+						<xs:documentation>Element für die Verkaufsdaten in Ausbaustufe 1</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:choice maxOccurs="unbounded">
+							<xs:element name="total" type="Total"/>
+							<xs:element name="keineDaten" type="KeineDatenBasis"/>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="Total">
+		<xs:annotation>
+			<xs:documentation>Typ für das Total in Ausbaustufe 1</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="TotalBasis">
+				<xs:sequence>
+					<xs:element name="subtotal" type="Subtotal" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="Subtotal">
+		<xs:annotation>
+			<xs:documentation>Typ für das Subtotal in Ausbaustufe 1</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="SubtotalBasis">
+				<xs:sequence>
+					<xs:element name="subtotalzeile" type="Subtotalzeile" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="Subtotalzeile">
+		<xs:annotation>
+			<xs:documentation>Typ für die Subtotalzeile in Ausbaustufe 1</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="SubtotalzeileBasis"/>
+		</xs:complexContent>
+	</xs:complexType>
+</xs:schema>

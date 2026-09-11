@@ -1,0 +1,1107 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://www.adas.de/spec/dws/v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.adas.de/spec/dws/v1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0">
+	<xs:annotation>
+		<xs:documentation>ADAS-DataWarehouse-Schnittstelle: Benötigte Datentypen - Version 1.0</xs:documentation>
+	</xs:annotation>
+	<xs:simpleType name="AbdaAmpreisv">
+		<xs:annotation>
+			<xs:documentation>Typ für Arzneimittelpreisverordnung gemäß ABDA-Artikelstamm</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:unsignedByte">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="3"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="AbdaAnbieter">
+		<xs:annotation>
+			<xs:documentation>Typ für den Schlüssel des Anbieters (gem. ABDA-Artikelstamm)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:maxInclusive value="99999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="AbdaBoolean">
+		<xs:annotation>
+			<xs:documentation>Typ für einen ABDA-Boolean-Wert</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:unsignedByte">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="AbdaDarreichungsform">
+		<xs:annotation>
+			<xs:documentation>Typ für den Schlüssel der Darreichungsform (gem. ABDA-Artikelstamm)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="3"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="AbdaLagertemperatur">
+		<xs:annotation>
+			<xs:documentation>Typ für die Lagertemperatur (gem. ABDA-Artikelstamm)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:minInclusive value="-9999"/>
+			<xs:maxInclusive value="+9999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="AbdaNotfalldepot">
+		<xs:annotation>
+			<xs:documentation>Typ für das Notfalldepot der Apotheke (gem. ABDA-Artikelstamm)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:unsignedByte">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="99"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="AbdaWarengruppe">
+		<xs:annotation>
+			<xs:documentation>Typ für den Schlüssel der ABDA-Warengruppe</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="8"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Abgaberegelung">
+		<xs:annotation>
+			<xs:documentation>Typ für die Abgaberegelung</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="keine Angabe"/>
+			<xs:enumeration value="Keine"/>
+			<xs:enumeration value="Apothekenpflicht"/>
+			<xs:enumeration value="Verschreibungspflicht mit Ausnahmeregel"/>
+			<xs:enumeration value="Verschreibungspflicht"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Artikelart">
+		<xs:annotation>
+			<xs:documentation>Typ für die Art des Artikels</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="keine Angabe"/>
+			<xs:enumeration value="Nichtarzneimittel"/>
+			<xs:enumeration value="Arzneimittel"/>
+			<xs:enumeration value="Droge/Chemikalie"/>
+			<xs:enumeration value="Medizinprodukt"/>
+			<xs:enumeration value="Dienstleistung"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Auftragsart">
+		<xs:annotation>
+			<xs:documentation>Typ für die Auftragsart</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Normal"/>
+			<xs:enumeration value="Streckengeschäft"/>
+			<xs:enumeration value="Überweisungsgeschäft"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BelegId">
+		<xs:annotation>
+			<xs:documentation>Typ für die Belegkennung</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="20"/>
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Bewirtschaftungssart">
+		<xs:annotation>
+			<xs:documentation>Typ für die Bewirtschaftungsart</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="POS"/>
+			<xs:enumeration value="POR"/>
+			<xs:enumeration value="Besorger"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BtmNr">
+		<xs:annotation>
+			<xs:documentation>Typ für die BtMNr der Bundesopiumstelle</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:positiveInteger"/>
+	</xs:simpleType>
+	<xs:simpleType name="Geschlecht">
+		<xs:annotation>
+			<xs:documentation>Typ für das Geschlecht</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="männlich"/>
+			<xs:enumeration value="weiblich"/>
+			<xs:enumeration value="unbekannt"/>
+			<xs:enumeration value="nicht relevant"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Gtin">
+		<xs:annotation>
+			<xs:documentation>Typ für Global Trade Item Numbers (UPC, EAN, GTIN)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9]{8}"/>
+			<xs:pattern value="[0-9]{12}"/>
+			<xs:pattern value="[0-9]{13}"/>
+			<xs:pattern value="[0-9]{14}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Ik">
+		<xs:annotation>
+			<xs:documentation>Typ für Institutionskennzeichen</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:positiveInteger"/>
+	</xs:simpleType>
+	<xs:simpleType name="Kennung">
+		<xs:annotation>
+			<xs:documentation>Typ für die Kennungen</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="80"/>
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Konditionsart">
+		<xs:annotation>
+			<xs:documentation>Typ für die Konditionsart</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Barrabatt"/>
+			<xs:enumeration value="Naturalrabatt"/>
+			<xs:enumeration value="Kosten"/>
+			<xs:enumeration value="Punkte"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Konditionssystem">
+		<xs:annotation>
+			<xs:documentation>Typ für das Konditionssystem</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Keines"/>
+			<xs:enumeration value="Eigenes"/>
+			<xs:enumeration value="DeutschlandCard"/>
+			<xs:enumeration value="HappyDigits"/>
+			<xs:enumeration value="Payback"/>
+			<xs:enumeration value="Anderes"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Lieferanttyp">
+		<xs:annotation>
+			<xs:documentation>Typ für den Typ eines Lieferanten</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Großhändler"/>
+			<xs:enumeration value="Anbieter"/>
+			<xs:enumeration value="Kooperationspartner"/>
+			<xs:enumeration value="Filiale"/>
+			<xs:enumeration value="Sonstiger"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Menge">
+		<xs:annotation>
+			<xs:documentation>Typ für Mengenangaben in Stück</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int"/>
+	</xs:simpleType>
+	<xs:simpleType name="MwSt">
+		<xs:annotation>
+			<xs:documentation>Typ für den Mehrwertsteuersatz</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="5"/>
+			<xs:fractionDigits value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Platzierung">
+		<xs:annotation>
+			<xs:documentation>Typ für die Platzierung</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="keine"/>
+			<xs:enumeration value="Freiwahl"/>
+			<xs:enumeration value="Sichtwahl"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Preis">
+		<xs:annotation>
+			<xs:documentation>Typ für Preisangaben in Eurocent</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int"/>
+	</xs:simpleType>
+	<xs:simpleType name="Pzn">
+		<xs:annotation>
+			<xs:documentation>Typ für die Pharmazentralnummer</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:nonNegativeInteger"/>
+	</xs:simpleType>
+	<xs:simpleType name="SystemId">
+		<xs:annotation>
+			<xs:documentation>Typ für Systemkennungen</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="20"/>
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Verkaufsart">
+		<xs:annotation>
+			<xs:documentation>Typ für die Verkaufsart</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Normalverkauf"/>
+			<xs:enumeration value="PKV"/>
+			<xs:enumeration value="Arztempfehlung/Grünes Rezept"/>
+			<xs:enumeration value="GKV mit Zuzahlung"/>
+			<xs:enumeration value="GKV ohne Zuzahlung"/>
+			<xs:enumeration value="PC/Sprechstundenbedarf"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Zahlungsart">
+		<xs:annotation>
+			<xs:documentation>Typ für die Zahlungsart</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Bar"/>
+			<xs:enumeration value="Kreditkarte"/>
+			<xs:enumeration value="Debitkarte"/>
+			<xs:enumeration value="Rechnung"/>
+			<xs:enumeration value="Kredit/Schulden"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Artikelzeile">
+		<xs:annotation>
+			<xs:documentation>Basistyp für Artikelzeilen</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:group ref="AbdaArtikelstamminfo">
+				<xs:annotation>
+					<xs:documentation>Gruppe für Daten, die auf dem ABDA-Artikelstamm basieren</xs:documentation>
+				</xs:annotation>
+			</xs:group>
+			<xs:element name="notfalldepotEigen" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Gehört der Artikel zum Notfalldepot, dass die Apotheke sich selbst festgelegt hat?</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="anLager" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Ist dieser Artikel in der Regel an Lager? (Lagerartikel)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kalkulierterVk" type="Preis">
+				<xs:annotation>
+					<xs:documentation>kalkulierter Verkaufspreis der Apotheke in Eurocent, inkl. MwSt</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ArtikelzeileMitPlatzierungsinfo">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für erweiterte Artikelzeilen</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="Artikelzeile">
+				<xs:sequence>
+					<xs:group ref="Platzierungsinfo"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="Kondition">
+		<xs:annotation>
+			<xs:documentation>Typ für gewährte Konditionen</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="konditionsart" type="Konditionsart">
+				<xs:annotation>
+					<xs:documentation>Art der gewährten Kondition</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="konditionssystem" type="Konditionssystem">
+				<xs:annotation>
+					<xs:documentation>System, in dessen Rahmen diese Kondition gewährt wurde</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="betrag" type="Preis">
+				<xs:annotation>
+					<xs:documentation>Wert der Kondition in Eurocent bzw. bei Art="Punkte" die Anzahl der gewährten Punkte</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Lieferant">
+		<xs:annotation>
+			<xs:documentation>Typ für den Lieferanten</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="typ">
+				<xs:annotation>
+					<xs:documentation>Typ des Lieferanten</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="Lieferanttyp"/>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Name des Lieferanten</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="50"/>
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kopf">
+		<xs:annotation>
+			<xs:documentation>Typ die Kopf/Header-Informationen</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="version" type="xs:string" fixed="1.0">
+				<xs:annotation>
+					<xs:documentation>Version der ABDA-DWH-SSt</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="absender" type="Kennung">
+				<xs:annotation>
+					<xs:documentation>Eindeutige Kennung des Absenders, z. B. für datenliefernde Apotheken die BtmNr (aka BGANr, IDF).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="erstelltAm" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Zeitpunkt der Dateierstellung</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="instanzId" type="Kennung">
+				<xs:annotation>
+					<xs:documentation>Kennung der Instanz des Systems, die diese Daten liefert oder liefern soll. (Server, Mandant, etc.)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="system" type="System">
+				<xs:annotation>
+					<xs:documentation>Daten zum liefernden Warenwirtschaftssystem</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Mitarbeiter">
+		<xs:annotation>
+			<xs:documentation>Typ für die Mitarbeiterinformationen</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="mitarbeiterId" type="Kennung">
+				<xs:annotation>
+					<xs:documentation>Kennung des Mitarbeiters</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:group ref="Namensinfo"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Person">
+		<xs:annotation>
+			<xs:documentation>Typ für die Personendaten ab Stufe 1</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="personId" type="Kennung">
+				<xs:annotation>
+					<xs:documentation>Kennung der Person</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="geschlecht" type="Geschlecht" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Geschlecht der Person</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="geburtsjahr" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Geburtsjahr der Person (Jahrgang, vierstellig)</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:unsignedShort">
+						<xs:minInclusive value="1900"/>
+						<xs:maxInclusive value="9999"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:sequence minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Dieser Block ist nur bei Lieferung der Personendaten Stufe 2 vorhanden.</xs:documentation>
+				</xs:annotation>
+				<xs:group ref="Namensinfo"/>
+				<xs:choice>
+					<xs:element name="postfach" type="xs:integer">
+						<xs:annotation>
+							<xs:documentation>Postfach</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:sequence>
+						<xs:element name="strasse">
+							<xs:annotation>
+								<xs:documentation>Straße</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="50"/>
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="hausNr">
+							<xs:annotation>
+								<xs:documentation>Hausnummer</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="20"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:choice>
+				<xs:element name="staat">
+					<xs:annotation>
+						<xs:documentation>ALPHA-2 oder ALPHA-3 Staatenkürzel nach DIN ISO 3166</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="2"/>
+							<xs:maxLength value="3"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="postcode">
+					<xs:annotation>
+						<xs:documentation>staatenspezifischer Postcode für den Ort (z. B. in Deutschland die Postleitzahl)</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:maxLength value="20"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="ort">
+					<xs:annotation>
+						<xs:documentation>Ort</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:maxLength value="80"/>
+							<xs:minLength value="1"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="geburtsdatum" type="xs:dateTime">
+					<xs:annotation>
+						<xs:documentation>Geburtsdatum</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="krankenkasse" type="Ik">
+					<xs:annotation>
+						<xs:documentation>Institutionskennzeichen der Krankenkasse</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="System">
+		<xs:annotation>
+			<xs:documentation>Typ für das exportierende System</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="anbieter" type="Kennung">
+				<xs:annotation>
+					<xs:documentation>Kennung des Anbieters</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="systembezeichnung" type="Kennung">
+				<xs:annotation>
+					<xs:documentation>Kennung des Warenwirschaftssystems</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Zahlung">
+		<xs:annotation>
+			<xs:documentation>Typ für die Zahlung</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="zahlungsart" type="Zahlungsart">
+				<xs:annotation>
+					<xs:documentation>Art der erfolgten Zahlung</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="betrag" type="Preis">
+				<xs:annotation>
+					<xs:documentation>Wert der Zahlbetrags in Eurocent</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:group name="AbdaArtikelstamminfo">
+		<xs:annotation>
+			<xs:documentation>Gruppe für Daten, die auf dem ABDA-Artikelstamm basieren</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="pzn" type="Pzn">
+				<xs:annotation>
+					<xs:documentation>Pharmazentralnummer (Bei Eigenartikeln wurde diese im dafür vorgesehenen Nummernkreis durch das Warenwirtschaftssystem vergeben.)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="gtin" type="Gtin" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Global Trade Item Number (aka International/European Article Number, Universal Product Code)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Name der Packungsgröße</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="50"/>
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="menge">
+				<xs:annotation>
+					<xs:documentation>Menge der Packungsgröße</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="7"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="einheit">
+				<xs:annotation>
+					<xs:documentation>Einheit der Packungsgröße</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="2"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ampreisvAmg" type="AbdaAmpreisv">
+				<xs:annotation>
+					<xs:documentation>Arzneimittelpreisverordnung AMG gemäß Entschlüsselung ABDA-Artikelstamm</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ampreisvSgb" type="AbdaAmpreisv">
+				<xs:annotation>
+					<xs:documentation>Arzneimittelpreisverordnung SGB gemäß Entschlüsselung ABDA-Artikelstamm</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="btm" type="AbdaBoolean">
+				<xs:annotation>
+					<xs:documentation>Betäubungsmittel gemäß Entschlüsselung ABDA-Artikelstamm</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="abdaWarengruppe" type="AbdaWarengruppe">
+				<xs:annotation>
+					<xs:documentation>Schlüssel der zugeordneten Warengruppe des ABDA-Artikelstamms (KEY_WAR)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="darreichungsform" type="AbdaDarreichungsform">
+				<xs:annotation>
+					<xs:documentation>Schlüssel der Darreichungsform gem. ABDA-Artikelstamm (KEY_DAR)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="anbieter" type="AbdaAnbieter">
+				<xs:annotation>
+					<xs:documentation>Schlüssel der Adresse des Anbieters (Inverkehrbringer) gem. ABDA-Artikelstamms (KEY_ADR) oder - für eigene - der durch das Warenwirtschaftssystem vergebene. (Falls nicht vorhanden 0)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="lagertemperaturMin" type="AbdaLagertemperatur">
+				<xs:annotation>
+					<xs:documentation>minimale Lagertemperatur gemäß ABDA-Artikelstamm</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="lagertemperaturMax" type="AbdaLagertemperatur">
+				<xs:annotation>
+					<xs:documentation>maximale Lagertemperatur gemäß ABDA-Artikelstamm</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notfalldepot" type="AbdaNotfalldepot">
+				<xs:annotation>
+					<xs:documentation>Notfalldepot der Apotheke gem. der Entschlüsselung ABDA-Artikelstamms</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="abgaberegelung" type="Abgaberegelung">
+				<xs:annotation>
+					<xs:documentation>Abgaberegelung für diesen Artikel</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="artikelart" type="Artikelart">
+				<xs:annotation>
+					<xs:documentation>Art des Artikels</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="mwstsatz">
+				<xs:annotation>
+					<xs:documentation>Anzuwendender Mehrwertsteuersatz in Prozent</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:totalDigits value="5"/>
+						<xs:fractionDigits value="2"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="listenEk" type="Preis">
+				<xs:annotation>
+					<xs:documentation>Apothekeneinkaufspreis der Einzelpackung in Eurocent, exkl. MwSt</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="listenVk" type="Preis">
+				<xs:annotation>
+					<xs:documentation>Apothekenverkaufspreis der Einzelpackung in Eurocent, inkl. MwSt</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="Eigenpreisinfo">
+		<xs:annotation>
+			<xs:documentation>Gruppe für eigene Preisinformationen</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="nnek" type="Preis">
+				<xs:annotation>
+					<xs:documentation>Netto-Netto-Einkaufspreis (Einkaufspreis nach Abzug aller Konditionen) für die Einzelpackung in Eurocent, exkl. MwSt. Liegt für den angefoderten Tag kein NNEK vor, so bitte den NNEK des Exporttages heranziehen. Ist auch das nicht möglich bitte 0 eintragen.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="GkvErstattungsinfo">
+		<xs:annotation>
+			<xs:documentation>Gruppe für die Erstattungsinformationen der GKV</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="erstattungGkv" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Erfolgt bei dieser Zeile eine (Teil-)Zahlung durch die gesetzliche Krankenversicherung (GKV)?</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="erstattungGkvBetrag" type="Preis">
+				<xs:annotation>
+					<xs:documentation>Betrag in Eurocent der (Teil-) Zahlung durch die gesetzliche Krankenversicherung. Ist unter "erstattungGkv" ja (1) angegeben, so muss hier ein Wert stehen.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="Namensinfo">
+		<xs:annotation>
+			<xs:documentation>Gruppe für Namensinformationen</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="anrede">
+				<xs:annotation>
+					<xs:documentation>Anrede</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="30"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="titel">
+				<xs:annotation>
+					<xs:documentation>Titel</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="30"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Name</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="50"/>
+						<xs:minLength value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="vorname">
+				<xs:annotation>
+					<xs:documentation>Vorname</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="50"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="Platzierungsinfo">
+		<xs:annotation>
+			<xs:documentation>Gruppe für Platzierungsinformationen</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="platzierung" type="Platzierung">
+				<xs:annotation>
+					<xs:documentation>Platzierung des Artikels (auf Basis der Lagerorte ermittelt)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="lagerort" type="Kennung">
+				<xs:annotation>
+					<xs:documentation>Kennung des Lagerortes</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="Substitutionsinfo">
+		<xs:annotation>
+			<xs:documentation>Gruppe für Substitutionsinformationen</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="substitution">
+				<xs:annotation>
+					<xs:documentation>Substitutionserläuterung zu dieser Zeile</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:token">
+						<xs:enumeration value="taxiert und abgegeben"/>
+						<xs:enumeration value="taxiert"/>
+						<xs:enumeration value="abgegeben"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="substitutionsdifferenz" type="Preis">
+				<xs:annotation>
+					<xs:documentation>Differenz zwischen der Preisberechnung und Abgabe der kompletten Substitution. Gewinne als positiver und  Verluste als negativ Betrag in Eurocent.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:group>
+	<xs:complexType name="TotalBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für das Total</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="totalNr" type="Kennung">
+				<xs:annotation>
+					<xs:documentation>Eindeutige Totalnummer</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="verarbeitetAm" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Tag der Verarbeitung durch das Warenwirtschaftssystem</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="buchungAm" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Tag der Buchung</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="zahlung" type="Zahlung" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Zahlungsinformationen zu diesem Total</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kondition" type="Kondition" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Von der Apotheke gewährte Konditionen für das gesamte Total</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SubtotalBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für das Subtotal</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="storno" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Ist dieses Subtotal ein Storno eines vorherigen Subtotals?</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="verkaufsart" type="Verkaufsart">
+				<xs:annotation>
+					<xs:documentation>Art des Verkaufs</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="abverkaufsort" type="Kennung">
+				<xs:annotation>
+					<xs:documentation>Station o. ä. an dem der Abverkauf stattgefunden hat. (Leer falls nicht gepflegt)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="web" type="xs:boolean">
+				<xs:annotation>
+					<xs:documentation>Wurde dieses Subtotal über das Internet in Auftrag gegeben?</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SubtotalBasisMitPerson">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für das Subtotal mit Personeninformationen</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="SubtotalBasis">
+				<xs:sequence>
+					<xs:element name="verbraucher" type="Person" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Personenkennung des Verbrauchers</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="verkaeufer" type="Mitarbeiter">
+						<xs:annotation>
+							<xs:documentation>Informationen zum Verkäufer</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="SubtotalzeileBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für die Subtotalzeile</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="ArtikelzeileMitPlatzierungsinfo">
+				<xs:sequence>
+					<xs:element name="rabattVertrag" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Lag zum Verkaufszeitpunkt ein Rabattvertrag für den Artikel dieser Zeile vor?</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="tatsaechlicherVk" type="Preis">
+						<xs:annotation>
+							<xs:documentation>Tatsächlich gewährter Verkaufspreis der gesamten Verkaufsmenge (Zeilenwert) in Eurocent, inkl. MwSt</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="verkaufsmenge" type="Menge">
+						<xs:annotation>
+							<xs:documentation>abverkaufte Menge (inkl. "nachlieferungsmenge")</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="nachlieferungsmenge" type="Menge">
+						<xs:annotation>
+							<xs:documentation>Menge, die von der Apotheke noch nachzuliefern ist</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="kondition" type="Kondition" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Von der Apotheke gewährte Konditionen für die gesamte Verkaufsmenge (Zeilenwert)</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="zuzahlung" type="Preis">
+						<xs:annotation>
+							<xs:documentation>Zuzahlung der gesamten Verkaufsmenge (Zeilenwert) in Eurocent, inkl. MwSt</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="mehrkosten" type="Preis">
+						<xs:annotation>
+							<xs:documentation>Mehrkosten der gesamten Verkaufsmenge (Zeilenwert) in Eurocent, inkl. MwSt</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="krankenkassenrabatt" type="Preis">
+						<xs:annotation>
+							<xs:documentation>Krankenkassenrabatt der Apotheke gemäß §130 SGB V für die gesamte Verkaufsmenge (Zeilenwert) in Eurocent, inkl. MwSt</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:group ref="Substitutionsinfo"/>
+					<xs:group ref="GkvErstattungsinfo"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="NeinverkaufBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für den Neinverkauf (Nachfrage ohne Bestellung)</xs:documentation>
+		</xs:annotation>
+	</xs:complexType>
+	<xs:complexType name="NeinverkaufszeileBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für die Neinverkaufszeile (Nachfrage ohne Bestellung)</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="Artikelzeile">
+				<xs:sequence>
+					<xs:element name="verarbeitetAm" type="xs:dateTime">
+						<xs:annotation>
+							<xs:documentation>Tag der Verarbeitung durch das Warenwirtschaftssystem</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="nachfrageVom" type="xs:dateTime">
+						<xs:annotation>
+							<xs:documentation>Tag der Nachfrage</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="nachfragemenge" type="Menge">
+						<xs:annotation>
+							<xs:documentation>Nachgefragte Menge</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="WareneingangBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für den Wareneingang</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="beleg" type="BelegId">
+				<xs:annotation>
+					<xs:documentation>Kennung des verbuchten Wareneingangsbelegs (Rechnungsnummer, Lieferscheinnummer o.ä.)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="verarbeitetAm" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Tag der Verarbeitung durch das Warenwirtschaftssystem</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="belegVom" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Datum des Wareneingangsbelegs</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="belegBetrag" type="Preis">
+				<xs:annotation>
+					<xs:documentation>Gesamtbetrag nach Abzug aller Konditionen (aber inkl. aller Nebenkosten) in Eurocent, exkl. MwSt</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="belegNebenkosten" type="Preis">
+				<xs:annotation>
+					<xs:documentation>Nebenkosten: Beschaffungskosten, Entsorgungsgutschriften, Pfand etc.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="lieferant" type="Lieferant">
+				<xs:annotation>
+					<xs:documentation>Lieferant (derjenige, der die Ware geliefert hat)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="auftragsart" type="Auftragsart">
+				<xs:annotation>
+					<xs:documentation>Art des Auftrags, der diesem Wareneingang zugrunde liegt.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="WareneingangszeileBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für die Wareneingangszeile</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="Artikelzeile">
+				<xs:sequence>
+					<xs:element name="liefermenge" type="Menge">
+						<xs:annotation>
+							<xs:documentation>Tatsächlich gelieferte Menge (Packungsanzahl, inkl. Naturalrabatt/exkl. Defekte )</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="buchEk" type="Preis">
+						<xs:annotation>
+							<xs:documentation>Erwarteter Einkaufspreis gemäß Lieferschein für die Einzelpackung in Eurocent, exkl. MwSt</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="RetoureBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für die Retoure</xs:documentation>
+		</xs:annotation>
+	</xs:complexType>
+	<xs:complexType name="RetourenzeileBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für die Retourenzeile</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="Artikelzeile">
+				<xs:sequence>
+					<xs:element name="lieferant" type="Lieferant">
+						<xs:annotation>
+							<xs:documentation>Lieferant (derjenige, an den die Ware zurückgegeben wurde)</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="verarbeitetAm" type="xs:dateTime">
+						<xs:annotation>
+							<xs:documentation>Tag der Verarbeitung durch das Warenwirtschaftssystem</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="gutschriftAm" type="xs:dateTime">
+						<xs:annotation>
+							<xs:documentation>Tag der Gutschrift</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="retourenmenge" type="Menge">
+						<xs:annotation>
+							<xs:documentation>tatsächlich gutgeschriebene retournierte Menge</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="retourenerstattung" type="Preis">
+						<xs:annotation>
+							<xs:documentation>Gewährter Zeilenwert gemäß Retourenbeleg in Eurocent, exkl. MwSt</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="quotenrelevant" type="AbdaBoolean">
+						<xs:annotation>
+							<xs:documentation>Unterliegt diese Retourenzeile der Retourenquote? 0 falls nicht gepflegt, 1 falls Nein, 2 falls Ja.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="LagerBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für das Lager</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="StandVom" type="xs:dateTime"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="LagerzeileBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für die Lagerzeile</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="ArtikelzeileMitPlatzierungsinfo">
+				<xs:sequence>
+					<xs:element name="bestand" type="Menge">
+						<xs:annotation>
+							<xs:documentation>Bestand zum Zeitpunkt des Datenexports</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="fruehesterVerfall" type="xs:dateTime">
+						<xs:annotation>
+							<xs:documentation>Frühestes Verfalldatum, der zu diesem Artikel an Lager liegenden Packungen. Bei fehlender Angabe wird der 31.12.9999 gesetzt.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="bewirtschaftungssart" type="Bewirtschaftungssart">
+						<xs:annotation>
+							<xs:documentation>Art der Bewirtschaftung dieses Artikels</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="KeineDatenBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für die Keine-Daten-Meldung</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="xs:dateTime"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="AnfrageBasis">
+		<xs:annotation>
+			<xs:documentation>BasisTyp für die Anfrage</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="datenVom" type="xs:dateTime" minOccurs="0" maxOccurs="31"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
