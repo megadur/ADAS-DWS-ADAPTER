@@ -1,6 +1,5 @@
 # ApoMonitor - Home Assistant Dashboard YAML
-# Kopieren Sie diesen Inhalt in Home Assistant:
-# Dashboard -> Oben rechts (3 Punkte) -> Dashboard bearbeiten -> Oben rechts (3 Punkte) -> Raw-Konfigurationseditor
+# Angepasst an die exakten Home Assistant Auto-Discovery Entitäts-Namen
 
 title: ApoMonitor
 views:
@@ -8,25 +7,25 @@ views:
     path: apo_monitor
     icon: mdi:pharmacy
     badges:
-      - entity: binary_sensor.ks01_online
+      - entity: binary_sensor.apotheken_kommissionierer_ks01_kommissionierer_online
         name: Automat Online
-      - entity: sensor.ks01_state
+      - entity: sensor.apotheken_kommissionierer_ks01_kommissionierer_status
         name: Status
-      - entity: sensor.ks01_active_tasks
+      - entity: sensor.apotheken_kommissionierer_ks01_aktive_auftrage
         name: Aktive Aufträge
 
     cards:
       # 🚨 ZUSTAND & EARLY WARNING BANNER
       - type: conditional
         conditions:
-          - entity: sensor.ks01_state
+          - entity: sensor.apotheken_kommissionierer_ks01_kommissionierer_status
             state_not: Ready
         card:
           type: markdown
           content: >
             ### ⚠️ Warnung: Kommissionierer nicht betriebsbereit!
-            **Aktueller Status:** {{ states('sensor.ks01_state') }}
-            **Aktive Aufträge in Queue:** {{ states('sensor.ks01_active_tasks') }}
+            **Aktueller Status:** {{ states('sensor.apotheken_kommissionierer_ks01_kommissionierer_status') }}
+            **Aktive Aufträge in Queue:** {{ states('sensor.apotheken_kommissionierer_ks01_aktive_auftrage') }}
             
             *Bitte Automaten-Anzeige prüfen.*
 
@@ -38,7 +37,7 @@ views:
         cards:
           # Auslagerungsdauer Gauge
           - type: gauge
-            entity: sensor.ks01_avg_output_time_1h
+            entity: sensor.apotheken_kommissionierer_ks01_auslagerungsdauer_1h
             name: Auslagerungsdauer (1h Ø)
             unit: s
             min: 0
@@ -50,7 +49,7 @@ views:
 
           # Fehlerquote Gauge
           - type: gauge
-            entity: sensor.ks01_error_rate_24h
+            entity: sensor.apotheken_kommissionierer_ks01_fehlerquote_24h
             name: Fehlerquote 24h
             unit: "%"
             min: 0
@@ -62,7 +61,7 @@ views:
 
           # Aktive Vorgänge Kachel
           - type: tile
-            entity: sensor.ks01_active_tasks
+            entity: sensor.apotheken_kommissionierer_ks01_aktive_auftrage
             name: Queue / Aktive Tasks
             icon: mdi:tray-full
             color: blue
@@ -76,20 +75,20 @@ views:
             title: Auslagerungsdauer Verlauf (1h Rollierend)
             hours_to_show: 24
             entities:
-              - entity: sensor.ks01_avg_output_time_1h
+              - entity: sensor.apotheken_kommissionierer_ks01_auslagerungsdauer_1h
                 name: Dauer (s)
 
           - type: entities
             title: Tages-Durchsatz Automaten
             show_header_toggle: false
             entities:
-              - entity: sensor.ks01_outputs_today
+              - entity: sensor.apotheken_kommissionierer_ks01_auslagerungen_heute
                 name: Ausgelagerte Packungen
                 icon: mdi:package-up
-              - entity: sensor.ks01_inputs_today
+              - entity: sensor.apotheken_kommissionierer_ks01_einlagerungen_heute
                 name: Eingelagerte Packungen
                 icon: mdi:package-down
-              - entity: binary_sensor.ks01_online
+              - entity: binary_sensor.apotheken_kommissionierer_ks01_kommissionierer_online
                 name: Automaten-Verbindung
 
       # 📈 ABSCHNITT 2: WARENWIRTSCHAFT & CONTROLLING (ADAS-DWS)
@@ -103,10 +102,10 @@ views:
             show_name: true
             show_icon: true
             entities:
-              - entity: sensor.pharmacy_dws_sales_today
+              - entity: sensor.apotheken_kommissionierer_ks01_wws_verkaufe_heute
                 name: Verkäufe (Bons)
                 icon: mdi:receipt
-              - entity: sensor.pharmacy_dws_stock_packs
+              - entity: sensor.apotheken_kommissionierer_ks01_wws_lagerbestand
                 name: Gesamtlagerbestand
                 icon: mdi:boxes
 
@@ -114,9 +113,9 @@ views:
             title: Verfalls- & Altbestand-Analyse
             show_header_toggle: false
             entities:
-              - entity: sensor.pharmacy_dws_expiring_90d
+              - entity: sensor.apotheken_kommissionierer_ks01_verfall_in_90_tagen
                 name: Verfall ≤ 90 Tage
                 icon: mdi:calendar-alert
-              - entity: sensor.pharmacy_dws_sales_today
+              - entity: sensor.apotheken_kommissionierer_ks01_wws_verkaufe_heute
                 name: Tagesverkäufe Kumuliert
                 icon: mdi:cash-register

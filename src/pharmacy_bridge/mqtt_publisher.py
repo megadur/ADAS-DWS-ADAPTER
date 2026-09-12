@@ -1,6 +1,6 @@
 """
 MQTT Auto-Discovery & State Publisher for Home Assistant
-Publishes sensor discovery configurations and state updates using HA standard MQTT topics.
+Publishes sensor discovery configurations with explicit object_id and state updates using HA standard MQTT topics.
 """
 
 import json
@@ -25,7 +25,7 @@ class HAMQTTPublisher:
 
     def generate_discovery_configs(self) -> List[Dict[str, Any]]:
         """
-        Generates Home Assistant MQTT Discovery configuration dictionaries for all sensors.
+        Generates Home Assistant MQTT Discovery configuration dictionaries for all sensors with explicit object_ids.
         """
         base_state_topic = f"{self.state_prefix}/{self.node_id}/metrics"
         availability_topic = f"{self.state_prefix}/{self.node_id}/availability"
@@ -36,6 +36,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/binary_sensor/{self.node_id}_online/config",
                 "payload": {
                     "name": "Kommissionierer Online",
+                    "object_id": f"{self.node_id}_online",
                     "unique_id": f"{self.node_id}_online",
                     "state_topic": availability_topic,
                     "payload_on": "online",
@@ -49,6 +50,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_state/config",
                 "payload": {
                     "name": "Kommissionierer Status",
+                    "object_id": f"{self.node_id}_state",
                     "unique_id": f"{self.node_id}_state",
                     "state_topic": base_state_topic,
                     "value_template": "{{ value_json.state }}",
@@ -62,6 +64,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_active_tasks/config",
                 "payload": {
                     "name": "Aktive Aufträge",
+                    "object_id": f"{self.node_id}_active_tasks",
                     "unique_id": f"{self.node_id}_active_tasks",
                     "state_topic": base_state_topic,
                     "value_template": "{{ value_json.active_tasks }}",
@@ -76,6 +79,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_outputs_today/config",
                 "payload": {
                     "name": "Auslagerungen Heute",
+                    "object_id": f"{self.node_id}_outputs_today",
                     "unique_id": f"{self.node_id}_outputs_today",
                     "state_topic": base_state_topic,
                     "value_template": "{{ value_json.outputs_today }}",
@@ -90,6 +94,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_inputs_today/config",
                 "payload": {
                     "name": "Einlagerungen Heute",
+                    "object_id": f"{self.node_id}_inputs_today",
                     "unique_id": f"{self.node_id}_inputs_today",
                     "state_topic": base_state_topic,
                     "value_template": "{{ value_json.inputs_today }}",
@@ -104,6 +109,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_avg_output_time_1h/config",
                 "payload": {
                     "name": "Auslagerungsdauer 1h",
+                    "object_id": f"{self.node_id}_avg_output_time_1h",
                     "unique_id": f"{self.node_id}_avg_output_time_1h",
                     "state_topic": base_state_topic,
                     "value_template": "{{ value_json.avg_output_time_s_1h }}",
@@ -119,6 +125,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_error_rate_24h/config",
                 "payload": {
                     "name": "Fehlerquote 24h",
+                    "object_id": f"{self.node_id}_error_rate_24h",
                     "unique_id": f"{self.node_id}_error_rate_24h",
                     "state_topic": base_state_topic,
                     "value_template": "{{ value_json.error_rate_24h_pct }}",
@@ -133,6 +140,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_sales_today/config",
                 "payload": {
                     "name": "WWS Verkäufe Heute",
+                    "object_id": "pharmacy_dws_sales_today",
                     "unique_id": "pharmacy_dws_sales_today",
                     "state_topic": f"{self.state_prefix}/dws/metrics",
                     "value_template": "{{ value_json.total_sales_count }}",
@@ -147,6 +155,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_stock_packs/config",
                 "payload": {
                     "name": "WWS Lagerbestand",
+                    "object_id": "pharmacy_dws_stock_packs",
                     "unique_id": "pharmacy_dws_stock_packs",
                     "state_topic": f"{self.state_prefix}/dws/metrics",
                     "value_template": "{{ value_json.total_stock_packs }}",
@@ -161,6 +170,7 @@ class HAMQTTPublisher:
                 "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_expiring_90d/config",
                 "payload": {
                     "name": "Verfall in 90 Tagen",
+                    "object_id": "pharmacy_dws_expiring_90d",
                     "unique_id": "pharmacy_dws_expiring_90d",
                     "state_topic": f"{self.state_prefix}/dws/metrics",
                     "value_template": "{{ value_json.expiring_90d_count }}",
