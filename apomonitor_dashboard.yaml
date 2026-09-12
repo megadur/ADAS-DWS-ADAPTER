@@ -1,0 +1,122 @@
+# ApoMonitor - Home Assistant Dashboard YAML
+# Kopieren Sie diesen Inhalt in Home Assistant:
+# Dashboard -> Oben rechts (3 Punkte) -> Dashboard bearbeiten -> Oben rechts (3 Punkte) -> Raw-Konfigurationseditor
+
+title: ApoMonitor
+views:
+  - title: Apotheken-Steuerung
+    path: apo_monitor
+    icon: mdi:pharmacy
+    badges:
+      - entity: binary_sensor.ks01_online
+        name: Automat Online
+      - entity: sensor.ks01_state
+        name: Status
+      - entity: sensor.ks01_active_tasks
+        name: Aktive Aufträge
+
+    cards:
+      # 🚨 ZUSTAND & EARLY WARNING BANNER
+      - type: conditional
+        conditions:
+          - entity: sensor.ks01_state
+            state_not: Ready
+        card:
+          type: markdown
+          content: >
+            ### ⚠️ Warnung: Kommissionierer nicht betriebsbereit!
+            **Aktueller Status:** {{ states('sensor.ks01_state') }}
+            **Aktive Aufträge in Queue:** {{ states('sensor.ks01_active_tasks') }}
+            
+            *Bitte Automaten-Anzeige prüfen.*
+
+      # 📊 ABSCHNITT 1: KOMMISSIONIERAUTOMAT (WWKS2 LIVE-TELEMETRIE)
+      - type: grid
+        title: 🤖 Kommissionierautomat Performance (WWKS2)
+        columns: 3
+        square: false
+        cards:
+          # Auslagerungsdauer Gauge
+          - type: gauge
+            entity: sensor.ks01_avg_output_time_1h
+            name: Auslagerungsdauer (1h Ø)
+            unit: s
+            min: 0
+            max: 30
+            severity:
+              green: 0
+              yellow: 10
+              red: 20
+
+          # Fehlerquote Gauge
+          - type: gauge
+            entity: sensor.ks01_error_rate_24h
+            name: Fehlerquote 24h
+            unit: "%"
+            min: 0
+            max: 10
+            severity:
+              green: 0
+              yellow: 1.5
+              red: 5.0
+
+          # Aktive Vorgänge Kachel
+          - type: tile
+            entity: sensor.ks01_active_tasks
+            name: Queue / Aktive Tasks
+            icon: mdi:tray-full
+            color: blue
+
+      # Auslagerung / Einlagerung Kacheln & Verläufe
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: history-graph
+            title: Auslagerungsdauer Verlauf (1h Rollierend)
+            hours_to_show: 24
+            entities:
+              - entity: sensor.ks01_avg_output_time_1h
+                name: Dauer (s)
+
+          - type: entities
+            title: Tages-Durchsatz Automaten
+            show_header_toggle: false
+            entities:
+              - entity: sensor.ks01_outputs_today
+                name: Ausgelagerte Packungen
+                icon: mdi:package-up
+              - entity: sensor.ks01_inputs_today
+                name: Eingelagerte Packungen
+                icon: mdi:package-down
+              - entity: binary_sensor.ks01_online
+                name: Automaten-Verbindung
+
+      # 📈 ABSCHNITT 2: WARENWIRTSCHAFT & CONTROLLING (ADAS-DWS)
+      - type: grid
+        title: 🏬 Warenwirtschaft & Lagerqualität (ADAS-DWS)
+        columns: 2
+        square: false
+        cards:
+          - type: glance
+            title: Tagesgeschäft WWS
+            show_name: true
+            show_icon: true
+            entities:
+              - entity: sensor.pharmacy_dws_sales_today
+                name: Verkäufe (Bons)
+                icon: mdi:receipt
+              - entity: sensor.pharmacy_dws_stock_packs
+                name: Gesamtlagerbestand
+                icon: mdi:boxes
+
+          - type: entities
+            title: Verfalls- & Altbestand-Analyse
+            show_header_toggle: false
+            entities:
+              - entity: sensor.pharmacy_dws_expiring_90d
+                name: Verfall ≤ 90 Tage
+                icon: mdi:calendar-alert
+              - entity: sensor.pharmacy_dws_sales_today
+                name: Tagesverkäufe Kumuliert
+                icon: mdi:cash-register
