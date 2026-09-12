@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  pharmacy_simulator:
+    container_name: pharmacy_simulator
+    build: .
+    restart: always
+    command: python -m pharmacy_bridge.simulator --mqtt-host broker.hivemq.com --mqtt-port 1883 --interval 5

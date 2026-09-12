@@ -8,4 +8,4 @@ COPY samples/ ./samples/
 
 RUN pip install --no-cache-dir -e .
 
-CMD ["python", "-m", "pharmacy_bridge.simulator", "--mqtt-host", "localhost", "--mqtt-port", "1883"]
+CMD ["python", "-m", "pharmacy_bridge.simulator", "--mqtt-host", "broker.hivemq.com", "--mqtt-port", "1883"]
