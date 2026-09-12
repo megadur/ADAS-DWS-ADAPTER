@@ -46,7 +46,7 @@
                 <option value="wss" selected>wss:// (HTTPS)</option>
                 <option value="ws">ws:// (HTTP)</option>
             </select>
-            <input id="brokerHost" type="text" value="broker.hivemq.com" placeholder="IP / Hostname" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-40 focus:outline-none focus:border-emerald-500">
+            <input id="brokerHost" type="text" value="broker.hivemq.com" placeholder="IP / Hostname" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-44 focus:outline-none focus:border-emerald-500">
             <input id="brokerPort" type="number" value="8884" placeholder="Port" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-16 focus:outline-none focus:border-emerald-500">
             <button onclick="connectMQTT()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded font-semibold transition">Verbinden</button>
             <div id="statusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 ml-1">
@@ -181,6 +181,16 @@
     <script>
         lucide.createIcons();
 
+        // Auto-configure for HTTPS (GitHub Pages) vs HTTP (Local)
+        if (window.location.protocol === 'https:') {
+            const protoEl = document.getElementById('protocolSelect');
+            const hostEl = document.getElementById('brokerHost');
+            const portEl = document.getElementById('brokerPort');
+            if (protoEl) protoEl.value = 'wss';
+            if (hostEl && (hostEl.value === 'localhost' || !hostEl.value)) hostEl.value = 'broker.hivemq.com';
+            if (portEl && (portEl.value === '9001' || !portEl.value)) portEl.value = '8884';
+        }
+
         // Chart Setup
         const ctx = document.getElementById('telemetryChart').getContext('2d');
         const telemetryChart = new Chart(ctx, {
@@ -221,20 +231,34 @@
         let mqttClient = null;
 
         function connectMQTT() {
-            const proto = document.getElementById('protocolSelect').value;
-            const host = document.getElementById('brokerHost').value.trim();
-            const port = parseInt(document.getElementById('brokerPort').value.trim());
-            const useSSL = (proto === 'wss');
+            let proto = document.getElementById('protocolSelect') ? document.getElementById('protocolSelect').value : 'wss';
+            let host = document.getElementById('brokerHost') ? document.getElementById('brokerHost').value.trim() : 'broker.hivemq.com';
+            let port = document.getElementById('brokerPort') ? parseInt(document.getElementById('brokerPort').value.trim()) : 8884;
+
+            // Force HTTPS/WSS defaults if on HTTPS page to avoid mixed content errors
+            if (window.location.protocol === 'https:' && (host === 'localhost' || host === '127.0.0.1')) {
+                host = 'broker.hivemq.com';
+                port = 8884;
+                proto = 'wss';
+                if (document.getElementById('brokerHost')) document.getElementById('brokerHost').value = host;
+                if (document.getElementById('brokerPort')) document.getElementById('brokerPort').value = port;
+            }
+
+            const useSSL = (proto === 'wss' || window.location.protocol === 'https:');
             const clientId = 'apomonitor_ghpages_' + Math.random().toString(16).substr(2, 8);
 
-            document.getElementById('statusText').innerText = 'Verbinde...';
+            if (document.getElementById('statusText')) {
+                document.getElementById('statusText').innerText = 'Verbinde...';
+            }
 
             mqttClient = new Paho.MQTT.Client(host, port, clientId);
 
             mqttClient.onConnectionLost = function (responseObject) {
-                document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-1';
-                document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-400';
-                document.getElementById('statusText').innerText = 'Verbindung getrennt';
+                if (document.getElementById('statusBadge')) {
+                    document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-1';
+                    document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-400';
+                    document.getElementById('statusText').innerText = 'Verbindung getrennt';
+                }
             };
 
             mqttClient.onMessageArrived = function (message) {
@@ -295,18 +319,22 @@
             mqttClient.connect({
                 useSSL: useSSL,
                 onSuccess: function () {
-                    document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 ml-1';
-                    document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
-                    document.getElementById('statusText').innerText = 'Live verbunden (' + host + ')';
-                    document.getElementById('liveTag').innerText = 'MQTT Live';
+                    if (document.getElementById('statusBadge')) {
+                        document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 ml-1';
+                        document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                        document.getElementById('statusText').innerText = 'Live verbunden (' + host + ')';
+                        document.getElementById('liveTag').innerText = 'MQTT Live';
+                    }
 
                     // Subscribe to topics
                     mqttClient.subscribe('pharmacy/#');
                 },
                 onFailure: function (err) {
-                    document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-1';
-                    document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-400';
-                    document.getElementById('statusText').innerText = 'Fehler (Prüfe WSS SSL / Port)';
+                    if (document.getElementById('statusBadge')) {
+                        document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-1';
+                        document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-400';
+                        document.getElementById('statusText').innerText = 'Fehler (Prüfe WSS SSL / Port)';
+                    }
                 }
             });
         }
