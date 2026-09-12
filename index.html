@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApoMonitor - Apotheken Dashboard MVP</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#10b981', 600: '#059669' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Paho MQTT WebSocket Client CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-wrap items-center justify-between shadow-md gap-4">
+        <div class="flex items-center gap-3">
+            <div class="bg-emerald-500/10 text-emerald-400 p-2 rounded-lg border border-emerald-500/20">
+                <i data-lucide="cross"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide text-white">ApoMonitor <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 ml-2">GitHub Pages Live MVP</span></h1>
+                <p class="text-xs text-slate-400">Home Assistant & ADAS-DWS / WWKS2 Dashboard</p>
+            </div>
+        </div>
+        
+        <!-- Broker Connection Bar -->
+        <div class="flex items-center gap-2 bg-slate-900/80 p-2 rounded-lg border border-slate-700 text-xs">
+            <span class="text-slate-400 font-medium">MQTT Broker (NUCTOPF):</span>
+            <input id="brokerHost" type="text" value="localhost" placeholder="IP / Hostname (z.B. 192.168.178.xx)" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-44 focus:outline-none focus:border-emerald-500">
+            <input id="brokerPort" type="number" value="9001" placeholder="Port" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-16 focus:outline-none focus:border-emerald-500">
+            <button onclick="connectMQTT()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded font-semibold transition">Verbinden</button>
+            <div id="statusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 ml-1">
+                <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span id="statusText">Getrennt (Demo-Modus)</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+
+        <!-- Banner Alert (Dynamic) -->
+        <div id="alertBanner" class="hidden bg-rose-500/10 border border-rose-500/30 text-rose-300 p-4 rounded-xl flex items-center justify-between shadow-lg">
+            <div class="flex items-center gap-3">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-400 flex-shrink-0"></i>
+                <div>
+                    <h4 class="font-semibold text-sm text-rose-200">Störungsmeldung Kommissionierautomat</h4>
+                    <p class="text-xs text-rose-300/80">Der Status weicht von "Ready" ab oder die Verbindung wurde unterbrochen.</p>
+                </div>
+            </div>
+            <span id="valAlertStatus" class="text-xs bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded font-mono">Status: NotReady</span>
+        </div>
+
+        <!-- Section 1: Top KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Card 1: State -->
+            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm relative overflow-hidden">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-medium uppercase tracking-wider">Automaten Status</span>
+                    <i data-lucide="bot" class="w-5 h-5 text-emerald-400"></i>
+                </div>
+                <div id="valState" class="text-2xl font-bold text-emerald-400">Ready</div>
+                <p class="text-xs text-slate-400 mt-1">WWKS2 Telemetrie</p>
+            </div>
+
+            <!-- Card 2: Auslagerungen Heute -->
+            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-medium uppercase tracking-wider">Auslagerungen Heute</span>
+                    <i data-lucide="package-up" class="w-5 h-5 text-blue-400"></i>
+                </div>
+                <div id="valOutputs" class="text-2xl font-bold text-white">281 <span class="text-sm font-normal text-slate-400">Packungen</span></div>
+                <p class="text-xs text-slate-400 mt-1">Tagesdurchsatz Automaten</p>
+            </div>
+
+            <!-- Card 3: Auslagerungsdauer -->
+            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-medium uppercase tracking-wider">Auslagerungsdauer (1h Ø)</span>
+                    <i data-lucide="timer" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+                <div id="valAvgTime" class="text-2xl font-bold text-white">8.4 <span class="text-sm font-normal text-slate-400">s</span></div>
+                <p class="text-xs text-slate-400 mt-1">Sollwert: &lt; 15.0 s</p>
+            </div>
+
+            <!-- Card 4: WWS Lagerbestand -->
+            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-medium uppercase tracking-wider">WWS Lagerbestand</span>
+                    <i data-lucide="boxes" class="w-5 h-5 text-amber-400"></i>
+                </div>
+                <div id="valStock" class="text-2xl font-bold text-white">18.450 <span class="text-sm font-normal text-slate-400">Packungen</span></div>
+                <p class="text-xs text-slate-400 mt-1">ADAS-DWS Bestand</p>
+            </div>
+        </div>
+
+        <!-- Section 2: Graphs & Detailed Stats -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Chart Container (2 Cols) -->
+            <div class="lg:col-span-2 bg-slate-800 border border-slate-700 p-5 rounded-xl flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-200">Auslagerungsdauer & Durchsatz Trend (24h)</h3>
+                        <p class="text-xs text-slate-400">Echtzeit-Verlauf aus Ihrem Mosquitto Broker auf NUCTOPF</p>
+                    </div>
+                    <span id="liveTag" class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded">Simulation</span>
+                </div>
+                <div class="h-64">
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Side Card Stack (1 Col) -->
+            <div class="space-y-5">
+                <!-- Quality & Verfall -->
+                <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl">
+                    <h3 class="font-bold text-slate-200 mb-4 flex items-center gap-2">
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i> Lagerqualität & Verfall
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-2.5 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Verfall in &le; 90 Tagen</span>
+                            <span id="valExpiring" class="text-sm font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">34 Artikel</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Fehlerquote 24h</span>
+                            <span id="valErrorRate" class="text-sm font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">0.42 %</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Aktive Tasks in Queue</span>
+                            <span id="valQueue" class="text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">2 Tasks</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WWS Sales Summary -->
+                <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl">
+                    <h3 class="font-bold text-slate-200 mb-3 flex items-center gap-2">
+                        <i data-lucide="receipt" class="w-4 h-4 text-emerald-400"></i> WWS Tagesumsatz
+                    </h3>
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-xs text-slate-400">Verkäufe (Bons)</span>
+                        <span id="valSalesBons" class="text-lg font-bold text-white">145 Bons</span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-2 rounded-full mt-2 overflow-hidden">
+                        <div id="valProgressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 65%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 border-t border-slate-700 px-6 py-3 text-center text-xs text-slate-500">
+        ApoMonitor &copy; 2026 - Hosted on GitHub Pages | Connected to NUCTOPF MQTT Broker
+    </footer>
+
+    <!-- JS Logic -->
+    <script>
+        lucide.createIcons();
+
+        // Chart Setup
+        const ctx = document.getElementById('telemetryChart').getContext('2d');
+        const telemetryChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+                datasets: [
+                    {
+                        label: 'Auslagerungsdauer (s)',
+                        data: [7.8, 8.2, 9.1, 8.4, 7.9, 8.6, 8.4],
+                        borderColor: '#818cf8',
+                        backgroundColor: 'rgba(129, 140, 248, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Auslagerungen / h',
+                        data: [35, 42, 58, 49, 38, 44, 51],
+                        borderColor: '#34d399',
+                        backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#94a3b8' } } },
+                scales: {
+                    x: { ticks: { color: '#64748b' }, grid: { color: '#334155' } },
+                    y: { ticks: { color: '#64748b' }, grid: { color: '#334155' } }
+                }
+            }
+        });
+
+        // MQTT Client Setup (WebSocket)
+        let mqttClient = null;
+
+        function connectMQTT() {
+            const host = document.getElementById('brokerHost').value.trim();
+            const port = parseInt(document.getElementById('brokerPort').value.trim());
+            const clientId = 'apomonitor_ghpages_' + Math.random().toString(16).substr(2, 8);
+
+            document.getElementById('statusText').innerText = 'Verbinde...';
+
+            mqttClient = new Paho.MQTT.Client(host, port, clientId);
+
+            mqttClient.onConnectionLost = function (responseObject) {
+                document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-1';
+                document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-400';
+                document.getElementById('statusText').innerText = 'Verbindung getrennt';
+            };
+
+            mqttClient.onMessageArrived = function (message) {
+                try {
+                    const topic = message.destinationName;
+                    const payload = JSON.parse(message.payloadString);
+
+                    if (topic.includes('pharmacy/ks01/metrics')) {
+                        if (payload.state) {
+                            document.getElementById('valState').innerText = payload.state;
+                            if (payload.state !== 'Ready') {
+                                document.getElementById('alertBanner').classList.remove('hidden');
+                                document.getElementById('valAlertStatus').innerText = 'Status: ' + payload.state;
+                            } else {
+                                document.getElementById('alertBanner').classList.add('hidden');
+                            }
+                        }
+                        if (payload.outputs_today !== undefined) {
+                            document.getElementById('valOutputs').innerHTML = payload.outputs_today + ' <span class="text-sm font-normal text-slate-400">Packungen</span>';
+                        }
+                        if (payload.avg_output_time_s_1h !== undefined) {
+                            document.getElementById('valAvgTime').innerHTML = payload.avg_output_time_s_1h + ' <span class="text-sm font-normal text-slate-400">s</span>';
+                        }
+                        if (payload.error_rate_24h_pct !== undefined) {
+                            document.getElementById('valErrorRate').innerText = payload.error_rate_24h_pct + ' %';
+                        }
+                        if (payload.active_tasks !== undefined) {
+                            document.getElementById('valQueue').innerText = payload.active_tasks + ' Tasks';
+                        }
+                    } else if (topic.includes('pharmacy/dws/metrics')) {
+                        if (payload.total_stock_packs !== undefined) {
+                            document.getElementById('valStock').innerHTML = payload.total_stock_packs.toLocaleString('de-DE') + ' <span class="text-sm font-normal text-slate-400">Packungen</span>';
+                        }
+                        if (payload.total_sales_count !== undefined) {
+                            document.getElementById('valSalesBons').innerText = payload.total_sales_count + ' Bons';
+                        }
+                        if (payload.expiring_90d_count !== undefined) {
+                            document.getElementById('valExpiring').innerText = payload.expiring_90d_count + ' Artikel';
+                        }
+                    }
+                } catch (e) {
+                    console.log('Error parsing MQTT payload:', e);
+                }
+            };
+
+            mqttClient.connect({
+                onSuccess: function () {
+                    document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 ml-1';
+                    document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                    document.getElementById('statusText').innerText = 'Live verbunden (NUCTOPF)';
+                    document.getElementById('liveTag').innerText = 'MQTT Live';
+
+                    // Subscribe to topics
+                    mqttClient.subscribe('pharmacy/#');
+                },
+                onFailure: function (err) {
+                    document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-1';
+                    document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-400';
+                    document.getElementById('statusText').innerText = 'Fehler (Prüfe WebSocket 9001)';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
