@@ -1,0 +1,14 @@
+[Unit]
+Description=ApoMonitor Pharmacy Bridge & Simulator Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/user/ADAS-DWS-ADAPTER
+ExecStart=/usr/bin/python3 -m src.pharmacy_bridge.simulator --mqtt-host broker.hivemq.com --mqtt-port 1883 --interval 5
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
