@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    container_name: pharmacy_mosquitto
+    image: eclipse-mosquitto:latest
+    restart: always
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
+  pharmacy_simulator:
+    container_name: pharmacy_simulator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - mosquitto
+    command: python -m pharmacy_bridge.simulator --mqtt-host mosquitto --mqtt-port 1883 --interval 5
