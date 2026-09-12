@@ -1,5 +1,4 @@
-# ApoMonitor - Home Assistant Dashboard YAML
-# Angepasst an die exakten Home Assistant Auto-Discovery Entitäts-Namen
+# ApoMonitor - Home Assistant Dashboard YAML (Vertikales Stack-Layout - Keine abgeschnittenen Texte)
 
 title: ApoMonitor
 views:
@@ -15,7 +14,7 @@ views:
         name: Aktive Aufträge
 
     cards:
-      # 🚨 ZUSTAND & EARLY WARNING BANNER
+      # 🚨 ZUSTAND & EARLY WARNING BANNER (Wird nur bei NotReady/Störung eingeblendet)
       - type: conditional
         conditions:
           - entity: sensor.apotheken_kommissionierer_ks01_kommissionierer_status
@@ -29,16 +28,29 @@ views:
             
             *Bitte Automaten-Anzeige prüfen.*
 
-      # 📊 ABSCHNITT 1: KOMMISSIONIERAUTOMAT (WWKS2 LIVE-TELEMETRIE)
-      - type: grid
-        title: 🤖 Kommissionierautomat Performance (WWKS2)
-        columns: 3
-        square: false
+      # 📊 ABSCHNITT 1: KOMMISSIONIERAUTOMAT PERFORMANCE (WWKS2 - UNTEREINANDER)
+      - type: vertical-stack
         cards:
-          # Auslagerungsdauer Gauge
+          - type: markdown
+            content: "## 🤖 Kommissionierautomat Performance (WWKS2)"
+
+          # Aktive Vorgänge & Status Kacheln
+          - type: tile
+            entity: sensor.apotheken_kommissionierer_ks01_aktive_auftrage
+            name: Aktive Aufträge in Queue
+            icon: mdi:tray-full
+            color: blue
+
+          - type: tile
+            entity: sensor.apotheken_kommissionierer_ks01_kommissionierer_status
+            name: Automaten Status
+            icon: mdi:robot-industrial
+            color: green
+
+          # Auslagerungsdauer Gauge (Volle Breite)
           - type: gauge
             entity: sensor.apotheken_kommissionierer_ks01_auslagerungsdauer_1h
-            name: Auslagerungsdauer (1h Ø)
+            name: Auslagerungsdauer (1h Rollierender Mittelwert)
             unit: s
             min: 0
             max: 30
@@ -47,10 +59,10 @@ views:
               yellow: 10
               red: 20
 
-          # Fehlerquote Gauge
+          # Fehlerquote Gauge (Volle Breite)
           - type: gauge
             entity: sensor.apotheken_kommissionierer_ks01_fehlerquote_24h
-            name: Fehlerquote 24h
+            name: Fehlerquote 24 Stunden
             unit: "%"
             min: 0
             max: 10
@@ -59,44 +71,34 @@ views:
               yellow: 1.5
               red: 5.0
 
-          # Aktive Vorgänge Kachel
-          - type: tile
-            entity: sensor.apotheken_kommissionierer_ks01_aktive_auftrage
-            name: Queue / Aktive Tasks
-            icon: mdi:tray-full
-            color: blue
-
-      # Auslagerung / Einlagerung Kacheln & Verläufe
-      - type: grid
-        columns: 2
-        square: false
-        cards:
-          - type: history-graph
-            title: Auslagerungsdauer Verlauf (1h Rollierend)
-            hours_to_show: 24
-            entities:
-              - entity: sensor.apotheken_kommissionierer_ks01_auslagerungsdauer_1h
-                name: Dauer (s)
-
+          # Tages-Durchsatz Entitäten-Übersicht
           - type: entities
-            title: Tages-Durchsatz Automaten
+            title: Tages-Durchsatz & Status
             show_header_toggle: false
             entities:
               - entity: sensor.apotheken_kommissionierer_ks01_auslagerungen_heute
-                name: Ausgelagerte Packungen
+                name: Ausgelagerte Packungen Heute
                 icon: mdi:package-up
               - entity: sensor.apotheken_kommissionierer_ks01_einlagerungen_heute
-                name: Eingelagerte Packungen
+                name: Eingelagerte Packungen Heute
                 icon: mdi:package-down
               - entity: binary_sensor.apotheken_kommissionierer_ks01_kommissionierer_online
-                name: Automaten-Verbindung
+                name: Automaten-Verbindung (Online)
 
-      # 📈 ABSCHNITT 2: WARENWIRTSCHAFT & CONTROLLING (ADAS-DWS)
-      - type: grid
-        title: 🏬 Warenwirtschaft & Lagerqualität (ADAS-DWS)
-        columns: 2
-        square: false
+          # Verlaufsgraph
+          - type: history-graph
+            title: Auslagerungsdauer Verlauf (24h)
+            hours_to_show: 24
+            entities:
+              - entity: sensor.apotheken_kommissionierer_ks01_auslagerungsdauer_1h
+                name: Dauer (Sekunden)
+
+      # 📈 ABSCHNITT 2: WARENWIRTSCHAFT & CONTROLLING (ADAS-DWS - UNTEREINANDER)
+      - type: vertical-stack
         cards:
+          - type: markdown
+            content: "## 🏬 Warenwirtschaft & Lagerqualität (ADAS-DWS)"
+
           - type: glance
             title: Tagesgeschäft WWS
             show_name: true
@@ -114,7 +116,7 @@ views:
             show_header_toggle: false
             entities:
               - entity: sensor.apotheken_kommissionierer_ks01_verfall_in_90_tagen
-                name: Verfall ≤ 90 Tage
+                name: Verfall in ≤ 90 Tagen (Artikel)
                 icon: mdi:calendar-alert
               - entity: sensor.apotheken_kommissionierer_ks01_wws_verkaufe_heute
                 name: Tagesverkäufe Kumuliert
