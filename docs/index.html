@@ -42,7 +42,7 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold tracking-wide text-white flex items-center gap-2">
-                    ApoMonitor <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Live Animation MVP</span>
+                    ApoMonitor <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Live Dual-Axis Trend</span>
                 </h1>
                 <p class="text-xs text-slate-400">WWKS2 Telemetrie & ADAS-DWS Live-Controlling</p>
             </div>
@@ -88,7 +88,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">Automaten Status</span>
                     <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i>
                 </div>
-                <div id="valState" class="text-xl font-bold text-emerald-400">Warte auf Daten...</div>
+                <div id="valState" class="text-xl font-bold text-emerald-400">Ready</div>
                 <p class="text-xs text-slate-400 mt-1">WWKS2 Telemetrie</p>
             </div>
 
@@ -98,7 +98,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">Tagesumsatz EUR</span>
                     <i data-lucide="currency-eur" class="w-4 h-4 text-emerald-400"></i>
                 </div>
-                <div id="valSalesEur" class="text-xl font-bold text-white">-- €</div>
+                <div id="valSalesEur" class="text-xl font-bold text-white">3.485,00 €</div>
                 <p class="text-xs text-slate-400 mt-1">ADAS-DWS Live-Umsatz</p>
             </div>
 
@@ -108,7 +108,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">Auslagerungen</span>
                     <i data-lucide="package-up" class="w-4 h-4 text-blue-400"></i>
                 </div>
-                <div id="valOutputs" class="text-xl font-bold text-white">-- <span class="text-xs font-normal text-slate-400">Pckg.</span></div>
+                <div id="valOutputs" class="text-xl font-bold text-white">281 <span class="text-xs font-normal text-slate-400">Pckg.</span></div>
                 <p class="text-xs text-slate-400 mt-1">Tagesdurchsatz</p>
             </div>
 
@@ -118,7 +118,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">Auslagerdauer (1h Ø)</span>
                     <i data-lucide="timer" class="w-4 h-4 text-indigo-400"></i>
                 </div>
-                <div id="valAvgTime" class="text-xl font-bold text-white">-- <span class="text-xs font-normal text-slate-400">s</span></div>
+                <div id="valAvgTime" class="text-xl font-bold text-white">8.4 <span class="text-xs font-normal text-slate-400">s</span></div>
                 <p class="text-xs text-slate-400 mt-1">Sollwert: &lt; 15.0 s</p>
             </div>
 
@@ -128,7 +128,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">WWS Lagerbestand</span>
                     <i data-lucide="boxes" class="w-4 h-4 text-amber-400"></i>
                 </div>
-                <div id="valStock" class="text-xl font-bold text-white">-- <span class="text-xs font-normal text-slate-400">Pckg.</span></div>
+                <div id="valStock" class="text-xl font-bold text-white">18.450 <span class="text-xs font-normal text-slate-400">Pckg.</span></div>
                 <p class="text-xs text-slate-400 mt-1">ADAS-DWS Bestand</p>
             </div>
         </div>
@@ -141,9 +141,9 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h3 class="font-bold text-slate-200 flex items-center gap-2">
-                            <i data-lucide="activity" class="w-4 h-4 text-indigo-400"></i> Live-Auslagerungsdauer & Tagesverkäufe Trend
+                            <i data-lucide="activity" class="w-4 h-4 text-indigo-400"></i> Live-Auslagerungsdauer & Verkäufe Trend
                         </h3>
-                        <p class="text-xs text-slate-400">Echtzeit-Telemetriekurve (Dynamisch aktualisiert bei jedem MQTT Event)</p>
+                        <p class="text-xs text-slate-400">Echtzeit-Telemetrie mit Doppel-Y-Achse (Links: Dauer in Sek, Rechts: Verkäufe Bons)</p>
                     </div>
                     <span id="liveTag" class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full animate-pulse font-semibold">MQTT Live</span>
                 </div>
@@ -162,15 +162,15 @@
                     <div class="space-y-2.5">
                         <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Wartende Tasks (Queue)</span>
-                            <span id="valQueuedTasks" class="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">0 Tasks</span>
+                            <span id="valQueuedTasks" class="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">2 Tasks</span>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Einlagerungen Heute</span>
-                            <span id="valInputs" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">-- Pckg.</span>
+                            <span id="valInputs" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">48 Pckg.</span>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Fehlerquote 24h</span>
-                            <span id="valErrorRate" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">0.00 %</span>
+                            <span id="valErrorRate" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">0.42 %</span>
                         </div>
                     </div>
                 </div>
@@ -183,15 +183,15 @@
                     <div class="space-y-2.5">
                         <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Wareneingang Heute</span>
-                            <span id="valGoodsReceipts" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">-- Pckg.</span>
+                            <span id="valGoodsReceipts" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">280 Pckg.</span>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Neinverkäufe (Stockout)</span>
-                            <span id="valMissedSales" class="text-xs font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">-- Anfragen</span>
+                            <span id="valMissedSales" class="text-xs font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">5 Anfragen</span>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Retouren Belege</span>
-                            <span id="valReturns" class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">-- Belege</span>
+                            <span id="valReturns" class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">2 Belege</span>
                         </div>
                     </div>
                 </div>
@@ -204,15 +204,15 @@
                     <div class="space-y-2.5">
                         <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Verfall in &le; 90 Tagen</span>
-                            <span id="valExpiring" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">-- Artikel</span>
+                            <span id="valExpiring" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">34 Artikel</span>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Altbestand &gt; 180 Tage</span>
-                            <span id="valOldStock" class="text-xs font-bold text-slate-400 bg-slate-700/50 px-2 py-0.5 rounded">-- Artikel</span>
+                            <span id="valOldStock" class="text-xs font-bold text-slate-400 bg-slate-700/50 px-2 py-0.5 rounded">12 Artikel</span>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Verkäufe (Bons)</span>
-                            <span id="valSalesBons" class="text-xs font-bold text-white bg-slate-700 px-2 py-0.5 rounded">-- Bons</span>
+                            <span id="valSalesBons" class="text-xs font-bold text-white bg-slate-700 px-2 py-0.5 rounded">145 Bons</span>
                         </div>
                     </div>
                 </div>
@@ -229,6 +229,10 @@
     <!-- JS Logic -->
     <script>
         lucide.createIcons();
+
+        // Global tracker for current live values
+        let currentAvgTime = 8.4;
+        let currentSalesBons = 145;
 
         // Helper for card pulse effect on update
         function triggerPulse(elementId) {
@@ -250,28 +254,41 @@
             if (portEl && (portEl.value === '9001' || !portEl.value)) portEl.value = '8884';
         }
 
-        // Chart Setup
+        // Initial trend data for initial render
+        const now = new Date();
+        const initialTimes = [];
+        const initialTimesData = [7.8, 8.2, 8.9, 9.4, 8.1, 7.9, 8.4];
+        const initialSalesData = [120, 126, 131, 137, 140, 143, 145];
+        
+        for (let i = 6; i >= 0; i--) {
+            const t = new Date(now.getTime() - i * 60000);
+            initialTimes.push(t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+        }
+
+        // Chart Setup with Dual Y-Axes
         const ctx = document.getElementById('telemetryChart').getContext('2d');
         const telemetryChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [],
+                labels: initialTimes,
                 datasets: [
                     {
                         label: 'Auslagerungsdauer (s)',
-                        data: [],
+                        data: initialTimesData,
                         borderColor: '#818cf8',
                         backgroundColor: 'rgba(129, 140, 248, 0.15)',
                         fill: true,
-                        tension: 0.4
+                        tension: 0.4,
+                        yAxisID: 'y'
                     },
                     {
-                        label: 'Auslagerungen Packungen',
-                        data: [],
+                        label: 'Verkäufe (Bons)',
+                        data: initialSalesData,
                         borderColor: '#34d399',
                         backgroundColor: 'rgba(52, 211, 153, 0.15)',
                         fill: true,
-                        tension: 0.4
+                        tension: 0.4,
+                        yAxisID: 'y1'
                     }
                 ]
             },
@@ -281,7 +298,24 @@
                 plugins: { legend: { labels: { color: '#94a3b8' } } },
                 scales: {
                     x: { ticks: { color: '#64748b' }, grid: { color: '#334155' } },
-                    y: { ticks: { color: '#64748b' }, grid: { color: '#334155' } }
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Auslagerdauer (s)', color: '#818cf8' },
+                        ticks: { color: '#818cf8' },
+                        grid: { color: '#334155' },
+                        min: 0,
+                        max: 25
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Verkäufe (Bons)', color: '#34d399' },
+                        ticks: { color: '#34d399' },
+                        grid: { drawOnChartArea: false }
+                    }
                 }
             }
         });
@@ -343,6 +377,7 @@
                             document.getElementById('valInputs').innerText = payload.inputs_today + ' Pckg.';
                         }
                         if (payload.avg_output_time_s_1h !== undefined) {
+                            currentAvgTime = payload.avg_output_time_s_1h;
                             document.getElementById('valAvgTime').innerHTML = payload.avg_output_time_s_1h + ' <span class="text-xs font-normal text-slate-400">s</span>';
                             triggerPulse('cardAvgTime');
                         }
@@ -356,16 +391,16 @@
                             document.getElementById('valQueue').innerText = payload.active_tasks + ' Tasks';
                         }
 
-                        // Chart update
-                        const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                        if (telemetryChart.data.labels.length > 12) {
+                        // Chart update on WWKS2 metric
+                        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        if (telemetryChart.data.labels.length > 10) {
                             telemetryChart.data.labels.shift();
                             telemetryChart.data.datasets[0].data.shift();
                             telemetryChart.data.datasets[1].data.shift();
                         }
-                        telemetryChart.data.labels.push(nowTime);
-                        telemetryChart.data.datasets[0].data.push(payload.avg_output_time_s_1h || 0);
-                        telemetryChart.data.datasets[1].data.push(payload.outputs_today || 0);
+                        telemetryChart.data.labels.push(timeStr);
+                        telemetryChart.data.datasets[0].data.push(currentAvgTime);
+                        telemetryChart.data.datasets[1].data.push(currentSalesBons);
                         telemetryChart.update();
 
                     } else if (topic.includes('pharmacy/dws/metrics')) {
@@ -379,6 +414,7 @@
                             triggerPulse('cardStock');
                         }
                         if (payload.total_sales_count !== undefined) {
+                            currentSalesBons = payload.total_sales_count;
                             document.getElementById('valSalesBons').innerText = payload.total_sales_count + ' Bons';
                         }
                         if (payload.expiring_90d_count !== undefined) {
