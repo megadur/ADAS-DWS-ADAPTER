@@ -41,9 +41,13 @@
         
         <!-- Broker Connection Bar -->
         <div class="flex items-center gap-2 bg-slate-900/80 p-2 rounded-lg border border-slate-700 text-xs">
-            <span class="text-slate-400 font-medium">MQTT Broker (NUCTOPF):</span>
-            <input id="brokerHost" type="text" value="localhost" placeholder="IP / Hostname (z.B. 192.168.178.xx)" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-44 focus:outline-none focus:border-emerald-500">
-            <input id="brokerPort" type="number" value="9001" placeholder="Port" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-16 focus:outline-none focus:border-emerald-500">
+            <span class="text-slate-400 font-medium">MQTT Broker (NUCTOPF / Cloud):</span>
+            <select id="protocolSelect" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded">
+                <option value="wss">wss:// (HTTPS)</option>
+                <option value="ws">ws:// (HTTP)</option>
+            </select>
+            <input id="brokerHost" type="text" value="broker.hivemq.com" placeholder="IP / Hostname (z.B. 192.168.178.xx)" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-44 focus:outline-none focus:border-emerald-500">
+            <input id="brokerPort" type="number" value="8884" placeholder="Port" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-16 focus:outline-none focus:border-emerald-500">
             <button onclick="connectMQTT()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded font-semibold transition">Verbinden</button>
             <div id="statusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 ml-1">
                 <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
@@ -170,7 +174,7 @@
 
     <!-- Footer -->
     <footer class="bg-slate-800 border-t border-slate-700 px-6 py-3 text-center text-xs text-slate-500">
-        ApoMonitor &copy; 2026 - Hosted on GitHub Pages | Connected to NUCTOPF MQTT Broker
+        ApoMonitor &copy; 2026 - Hosted on GitHub Pages | Connected to NUCTOPF / Cloud MQTT Broker
     </footer>
 
     <!-- JS Logic -->
@@ -217,8 +221,10 @@
         let mqttClient = null;
 
         function connectMQTT() {
+            const proto = document.getElementById('protocolSelect').value;
             const host = document.getElementById('brokerHost').value.trim();
             const port = parseInt(document.getElementById('brokerPort').value.trim());
+            const useSSL = (proto === 'wss');
             const clientId = 'apomonitor_ghpages_' + Math.random().toString(16).substr(2, 8);
 
             document.getElementById('statusText').innerText = 'Verbinde...';
@@ -275,10 +281,11 @@
             };
 
             mqttClient.connect({
+                useSSL: useSSL,
                 onSuccess: function () {
                     document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 ml-1';
                     document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
-                    document.getElementById('statusText').innerText = 'Live verbunden (NUCTOPF)';
+                    document.getElementById('statusText').innerText = 'Live verbunden (' + host + ')';
                     document.getElementById('liveTag').innerText = 'MQTT Live';
 
                     // Subscribe to topics
@@ -287,7 +294,7 @@
                 onFailure: function (err) {
                     document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-1';
                     document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-400';
-                    document.getElementById('statusText').innerText = 'Fehler (Prüfe WebSocket 9001)';
+                    document.getElementById('statusText').innerText = 'Fehler (Prüfe WSS SSL / Port)';
                 }
             });
         }
