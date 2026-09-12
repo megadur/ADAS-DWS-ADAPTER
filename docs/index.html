@@ -27,26 +27,28 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
 
-    <!-- Navbar -->
-    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between shadow-md">
+    <!-- Header / Navbar -->
+    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-wrap items-center justify-between shadow-md gap-4">
         <div class="flex items-center gap-3">
             <div class="bg-emerald-500/10 text-emerald-400 p-2 rounded-lg border border-emerald-500/20">
                 <i data-lucide="cross"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold tracking-wide text-white">ApoMonitor <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 ml-2">MVP / Prototype</span></h1>
+                <h1 class="text-xl font-bold tracking-wide text-white">ApoMonitor <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 ml-2">GitHub Pages Live MVP</span></h1>
                 <p class="text-xs text-slate-400">Home Assistant & ADAS-DWS / WWKS2 Dashboard</p>
             </div>
         </div>
         
-        <div class="flex items-center gap-4">
-            <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>System Bereit (WWKS2 & DWS)</span>
+        <!-- Broker Connection Bar -->
+        <div class="flex items-center gap-2 bg-slate-900/80 p-2 rounded-lg border border-slate-700 text-xs">
+            <span class="text-slate-400 font-medium">MQTT Broker (NUCTOPF):</span>
+            <input id="brokerHost" type="text" value="localhost" placeholder="IP / Hostname (z.B. 192.168.178.xx)" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-44 focus:outline-none focus:border-emerald-500">
+            <input id="brokerPort" type="number" value="9001" placeholder="Port" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-16 focus:outline-none focus:border-emerald-500">
+            <button onclick="connectMQTT()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded font-semibold transition">Verbinden</button>
+            <div id="statusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 ml-1">
+                <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span id="statusText">Getrennt (Demo-Modus)</span>
             </div>
-            <button onclick="toggleSimModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-slate-600">
-                <i data-lucide="sliders" class="w-4 h-4"></i> Einstellungen / Simulator
-            </button>
         </div>
     </header>
 
@@ -62,7 +64,7 @@
                     <p class="text-xs text-rose-300/80">Der Status weicht von "Ready" ab oder die Verbindung wurde unterbrochen.</p>
                 </div>
             </div>
-            <span class="text-xs bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded font-mono">Status: NotReady</span>
+            <span id="valAlertStatus" class="text-xs bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded font-mono">Status: NotReady</span>
         </div>
 
         <!-- Section 1: Top KPI Cards -->
@@ -74,7 +76,7 @@
                     <i data-lucide="bot" class="w-5 h-5 text-emerald-400"></i>
                 </div>
                 <div id="valState" class="text-2xl font-bold text-emerald-400">Ready</div>
-                <p class="text-xs text-slate-400 mt-1">WWKS2 TCP/IP Verbindung aktiv</p>
+                <p class="text-xs text-slate-400 mt-1">WWKS2 Telemetrie</p>
             </div>
 
             <!-- Card 2: Auslagerungen Heute -->
@@ -103,7 +105,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">WWS Lagerbestand</span>
                     <i data-lucide="boxes" class="w-5 h-5 text-amber-400"></i>
                 </div>
-                <div id="valStock" class="text-2xl font-bold text-white">18.437 <span class="text-sm font-normal text-slate-400">Packungen</span></div>
+                <div id="valStock" class="text-2xl font-bold text-white">18.450 <span class="text-sm font-normal text-slate-400">Packungen</span></div>
                 <p class="text-xs text-slate-400 mt-1">ADAS-DWS Bestand</p>
             </div>
         </div>
@@ -116,9 +118,9 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h3 class="font-bold text-slate-200">Auslagerungsdauer & Durchsatz Trend (24h)</h3>
-                        <p class="text-xs text-slate-400">Echtzeit-Telemetrie via MQTT WebSocket</p>
+                        <p class="text-xs text-slate-400">Echtzeit-Verlauf aus Ihrem Mosquitto Broker auf NUCTOPF</p>
                     </div>
-                    <span class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded">Live Updated</span>
+                    <span id="liveTag" class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded">Simulation</span>
                 </div>
                 <div class="h-64">
                     <canvas id="telemetryChart"></canvas>
@@ -155,10 +157,10 @@
                     </h3>
                     <div class="flex items-baseline justify-between">
                         <span class="text-xs text-slate-400">Verkäufe (Bons)</span>
-                        <span id="valSalesBons" class="text-lg font-bold text-white">326 Bons</span>
+                        <span id="valSalesBons" class="text-lg font-bold text-white">145 Bons</span>
                     </div>
                     <div class="w-full bg-slate-700 h-2 rounded-full mt-2 overflow-hidden">
-                        <div id="valProgressBar" class="bg-emerald-500 h-full rounded-full" style="width: 72%"></div>
+                        <div id="valProgressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 65%"></div>
                     </div>
                 </div>
             </div>
@@ -168,10 +170,10 @@
 
     <!-- Footer -->
     <footer class="bg-slate-800 border-t border-slate-700 px-6 py-3 text-center text-xs text-slate-500">
-        Pharma Assistant &copy; 2026 - Hosted on GitHub Pages | ADAS-DWS & WWKS2 Architecture
+        ApoMonitor &copy; 2026 - Hosted on GitHub Pages | Connected to NUCTOPF MQTT Broker
     </footer>
 
-    <!-- JS Scripts -->
+    <!-- JS Logic -->
     <script>
         lucide.createIcons();
 
@@ -211,26 +213,84 @@
             }
         });
 
-        // Dynamic Live simulation tick in Browser
-        setInterval(() => {
-            const outputs = parseInt(document.getElementById('valOutputs').innerText) + Math.floor(Math.random() * 2);
-            document.getElementById('valOutputs').innerHTML = outputs + ' <span class="text-sm font-normal text-slate-400">Packungen</span>';
-            
-            const avgTime = (8.0 + Math.random() * 1.5).toFixed(1);
-            document.getElementById('valAvgTime').innerHTML = avgTime + ' <span class="text-sm font-normal text-slate-400">s</span>';
-            
-            // Push data point to chart
-            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            if (telemetryChart.data.labels.length > 10) {
-                telemetryChart.data.labels.shift();
-                telemetryChart.data.datasets[0].data.shift();
-                telemetryChart.data.datasets[1].data.shift();
-            }
-            telemetryChart.data.labels.push(nowTime);
-            telemetryChart.data.datasets[0].data.push(parseFloat(avgTime));
-            telemetryChart.data.datasets[1].data.push(Math.floor(35 + Math.random() * 25));
-            telemetryChart.update();
-        }, 5000);
+        // MQTT Client Setup (WebSocket)
+        let mqttClient = null;
+
+        function connectMQTT() {
+            const host = document.getElementById('brokerHost').value.trim();
+            const port = parseInt(document.getElementById('brokerPort').value.trim());
+            const clientId = 'apomonitor_ghpages_' + Math.random().toString(16).substr(2, 8);
+
+            document.getElementById('statusText').innerText = 'Verbinde...';
+
+            mqttClient = new Paho.MQTT.Client(host, port, clientId);
+
+            mqttClient.onConnectionLost = function (responseObject) {
+                document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-1';
+                document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-400';
+                document.getElementById('statusText').innerText = 'Verbindung getrennt';
+            };
+
+            mqttClient.onMessageArrived = function (message) {
+                try {
+                    const topic = message.destinationName;
+                    const payload = JSON.parse(message.payloadString);
+
+                    if (topic.includes('pharmacy/ks01/metrics')) {
+                        if (payload.state) {
+                            document.getElementById('valState').innerText = payload.state;
+                            if (payload.state !== 'Ready') {
+                                document.getElementById('alertBanner').classList.remove('hidden');
+                                document.getElementById('valAlertStatus').innerText = 'Status: ' + payload.state;
+                            } else {
+                                document.getElementById('alertBanner').classList.add('hidden');
+                            }
+                        }
+                        if (payload.outputs_today !== undefined) {
+                            document.getElementById('valOutputs').innerHTML = payload.outputs_today + ' <span class="text-sm font-normal text-slate-400">Packungen</span>';
+                        }
+                        if (payload.avg_output_time_s_1h !== undefined) {
+                            document.getElementById('valAvgTime').innerHTML = payload.avg_output_time_s_1h + ' <span class="text-sm font-normal text-slate-400">s</span>';
+                        }
+                        if (payload.error_rate_24h_pct !== undefined) {
+                            document.getElementById('valErrorRate').innerText = payload.error_rate_24h_pct + ' %';
+                        }
+                        if (payload.active_tasks !== undefined) {
+                            document.getElementById('valQueue').innerText = payload.active_tasks + ' Tasks';
+                        }
+                    } else if (topic.includes('pharmacy/dws/metrics')) {
+                        if (payload.total_stock_packs !== undefined) {
+                            document.getElementById('valStock').innerHTML = payload.total_stock_packs.toLocaleString('de-DE') + ' <span class="text-sm font-normal text-slate-400">Packungen</span>';
+                        }
+                        if (payload.total_sales_count !== undefined) {
+                            document.getElementById('valSalesBons').innerText = payload.total_sales_count + ' Bons';
+                        }
+                        if (payload.expiring_90d_count !== undefined) {
+                            document.getElementById('valExpiring').innerText = payload.expiring_90d_count + ' Artikel';
+                        }
+                    }
+                } catch (e) {
+                    console.log('Error parsing MQTT payload:', e);
+                }
+            };
+
+            mqttClient.connect({
+                onSuccess: function () {
+                    document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 ml-1';
+                    document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                    document.getElementById('statusText').innerText = 'Live verbunden (NUCTOPF)';
+                    document.getElementById('liveTag').innerText = 'MQTT Live';
+
+                    // Subscribe to topics
+                    mqttClient.subscribe('pharmacy/#');
+                },
+                onFailure: function (err) {
+                    document.getElementById('statusBadge').className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30 ml-1';
+                    document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-400';
+                    document.getElementById('statusText').innerText = 'Fehler (Prüfe WebSocket 9001)';
+                }
+            });
+        }
     </script>
 </body>
 </html>
