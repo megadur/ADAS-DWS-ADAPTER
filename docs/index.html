@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ApoMonitor - Apotheken Dashboard MVP</title>
+    <title>ApoMonitor - Apotheken Live Dashboard MVP</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -24,31 +24,40 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .pulse-update { animation: pulseGlow 0.6s ease-out; }
+        @keyframes pulseGlow {
+            0% { background-color: rgba(16, 185, 129, 0.3); transform: scale(1.02); }
+            100% { background-color: transparent; transform: scale(1); }
+        }
+    </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
 
     <!-- Header / Navbar -->
     <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-wrap items-center justify-between shadow-md gap-4">
         <div class="flex items-center gap-3">
-            <div class="bg-emerald-500/10 text-emerald-400 p-2 rounded-lg border border-emerald-500/20">
-                <i data-lucide="cross"></i>
+            <div class="bg-emerald-500/10 text-emerald-400 p-2.5 rounded-xl border border-emerald-500/20 shadow-inner">
+                <i data-lucide="cross" class="w-6 h-6"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold tracking-wide text-white">ApoMonitor <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 ml-2">GitHub Pages Live MVP</span></h1>
-                <p class="text-xs text-slate-400">Home Assistant & ADAS-DWS / WWKS2 Dashboard</p>
+                <h1 class="text-xl font-bold tracking-wide text-white flex items-center gap-2">
+                    ApoMonitor <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Live Animation MVP</span>
+                </h1>
+                <p class="text-xs text-slate-400">WWKS2 Telemetrie & ADAS-DWS Live-Controlling</p>
             </div>
         </div>
         
         <!-- Broker Connection Bar -->
-        <div class="flex items-center gap-2 bg-slate-900/80 p-2 rounded-lg border border-slate-700 text-xs">
-            <span class="text-slate-400 font-medium">MQTT Broker:</span>
+        <div class="flex items-center gap-2 bg-slate-900/90 p-2 rounded-xl border border-slate-700 text-xs shadow-inner">
+            <span class="text-slate-400 font-medium ml-1">MQTT Broker:</span>
             <select id="protocolSelect" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded">
                 <option value="wss" selected>wss:// (HTTPS)</option>
                 <option value="ws">ws:// (HTTP)</option>
             </select>
-            <input id="brokerHost" type="text" value="broker.hivemq.com" placeholder="IP / Hostname" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-44 focus:outline-none focus:border-emerald-500">
+            <input id="brokerHost" type="text" value="broker.hivemq.com" placeholder="IP / Hostname" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-36 focus:outline-none focus:border-emerald-500">
             <input id="brokerPort" type="number" value="8884" placeholder="Port" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-16 focus:outline-none focus:border-emerald-500">
-            <button onclick="connectMQTT()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded font-semibold transition">Verbinden</button>
+            <button onclick="connectMQTT()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg font-semibold transition shadow">Verbinden</button>
             <div id="statusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 ml-1">
                 <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
                 <span id="statusText">Verbinde...</span>
@@ -65,106 +74,146 @@
                 <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-400 flex-shrink-0"></i>
                 <div>
                     <h4 class="font-semibold text-sm text-rose-200">Störungsmeldung Kommissionierautomat</h4>
-                    <p class="text-xs text-rose-300/80">Der Status weicht von "Ready" ab oder die Verbindung wurde unterbrochen.</p>
+                    <p class="text-xs text-rose-300/80">Der Status weicht von "Ready" ab oder die Queue ist ausgelastet.</p>
                 </div>
             </div>
             <span id="valAlertStatus" class="text-xs bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded font-mono">Status: NotReady</span>
         </div>
 
-        <!-- Section 1: Top KPI Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Section 1: 5 Primary KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <!-- Card 1: State -->
-            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm relative overflow-hidden">
-                <div class="flex items-center justify-between text-slate-400 mb-2">
+            <div id="cardState" class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm transition">
+                <div class="flex items-center justify-between text-slate-400 mb-1.5">
                     <span class="text-xs font-medium uppercase tracking-wider">Automaten Status</span>
-                    <i data-lucide="bot" class="w-5 h-5 text-emerald-400"></i>
+                    <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i>
                 </div>
-                <div id="valState" class="text-2xl font-bold text-emerald-400">Warte auf Daten...</div>
+                <div id="valState" class="text-xl font-bold text-emerald-400">Warte auf Daten...</div>
                 <p class="text-xs text-slate-400 mt-1">WWKS2 Telemetrie</p>
             </div>
 
-            <!-- Card 2: Auslagerungen Heute -->
-            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm">
-                <div class="flex items-center justify-between text-slate-400 mb-2">
-                    <span class="text-xs font-medium uppercase tracking-wider">Auslagerungen Heute</span>
-                    <i data-lucide="package-up" class="w-5 h-5 text-blue-400"></i>
+            <!-- Card 2: Tagesumsatz EUR -->
+            <div id="cardSalesEur" class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm transition">
+                <div class="flex items-center justify-between text-slate-400 mb-1.5">
+                    <span class="text-xs font-medium uppercase tracking-wider">Tagesumsatz EUR</span>
+                    <i data-lucide="currency-eur" class="w-4 h-4 text-emerald-400"></i>
                 </div>
-                <div id="valOutputs" class="text-2xl font-bold text-white">-- <span class="text-sm font-normal text-slate-400">Packungen</span></div>
-                <p class="text-xs text-slate-400 mt-1">Tagesdurchsatz Automaten</p>
+                <div id="valSalesEur" class="text-xl font-bold text-white">-- €</div>
+                <p class="text-xs text-slate-400 mt-1">ADAS-DWS Live-Umsatz</p>
             </div>
 
-            <!-- Card 3: Auslagerungsdauer -->
-            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm">
-                <div class="flex items-center justify-between text-slate-400 mb-2">
-                    <span class="text-xs font-medium uppercase tracking-wider">Auslagerungsdauer (1h Ø)</span>
-                    <i data-lucide="timer" class="w-5 h-5 text-indigo-400"></i>
+            <!-- Card 3: Auslagerungen Heute -->
+            <div id="cardOutputs" class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm transition">
+                <div class="flex items-center justify-between text-slate-400 mb-1.5">
+                    <span class="text-xs font-medium uppercase tracking-wider">Auslagerungen</span>
+                    <i data-lucide="package-up" class="w-4 h-4 text-blue-400"></i>
                 </div>
-                <div id="valAvgTime" class="text-2xl font-bold text-white">-- <span class="text-sm font-normal text-slate-400">s</span></div>
+                <div id="valOutputs" class="text-xl font-bold text-white">-- <span class="text-xs font-normal text-slate-400">Pckg.</span></div>
+                <p class="text-xs text-slate-400 mt-1">Tagesdurchsatz</p>
+            </div>
+
+            <!-- Card 4: Auslagerungsdauer -->
+            <div id="cardAvgTime" class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm transition">
+                <div class="flex items-center justify-between text-slate-400 mb-1.5">
+                    <span class="text-xs font-medium uppercase tracking-wider">Auslagerdauer (1h Ø)</span>
+                    <i data-lucide="timer" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div id="valAvgTime" class="text-xl font-bold text-white">-- <span class="text-xs font-normal text-slate-400">s</span></div>
                 <p class="text-xs text-slate-400 mt-1">Sollwert: &lt; 15.0 s</p>
             </div>
 
-            <!-- Card 4: WWS Lagerbestand -->
-            <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm">
+            <!-- Card 5: WWS Lagerbestand -->
+            <div id="cardStock" class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-sm transition">
                 <div class="flex items-center justify-between text-slate-400 mb-2">
                     <span class="text-xs font-medium uppercase tracking-wider">WWS Lagerbestand</span>
-                    <i data-lucide="boxes" class="w-5 h-5 text-amber-400"></i>
+                    <i data-lucide="boxes" class="w-4 h-4 text-amber-400"></i>
                 </div>
-                <div id="valStock" class="text-2xl font-bold text-white">-- <span class="text-sm font-normal text-slate-400">Packungen</span></div>
+                <div id="valStock" class="text-xl font-bold text-white">-- <span class="text-xs font-normal text-slate-400">Pckg.</span></div>
                 <p class="text-xs text-slate-400 mt-1">ADAS-DWS Bestand</p>
             </div>
         </div>
 
-        <!-- Section 2: Graphs & Detailed Stats -->
+        <!-- Section 2: Interactive Realtime Chart & Detailed Panel Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Chart Container (2 Cols) -->
-            <div class="lg:col-span-2 bg-slate-800 border border-slate-700 p-5 rounded-xl flex flex-col justify-between">
+            <!-- Realtime Chart (2 Cols) -->
+            <div class="lg:col-span-2 bg-slate-800 border border-slate-700 p-5 rounded-xl flex flex-col justify-between shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h3 class="font-bold text-slate-200">Auslagerungsdauer & Durchsatz Trend (24h)</h3>
-                        <p class="text-xs text-slate-400">Echtzeit-Verlauf aus dem HiveMQ / NUCTOPF MQTT Broker</p>
+                        <h3 class="font-bold text-slate-200 flex items-center gap-2">
+                            <i data-lucide="activity" class="w-4 h-4 text-indigo-400"></i> Live-Auslagerungsdauer & Tagesverkäufe Trend
+                        </h3>
+                        <p class="text-xs text-slate-400">Echtzeit-Telemetriekurve (Dynamisch aktualisiert bei jedem MQTT Event)</p>
                     </div>
-                    <span id="liveTag" class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded">MQTT Live</span>
+                    <span id="liveTag" class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full animate-pulse font-semibold">MQTT Live</span>
                 </div>
-                <div class="h-64">
+                <div class="h-72">
                     <canvas id="telemetryChart"></canvas>
                 </div>
             </div>
 
-            <!-- Side Card Stack (1 Col) -->
-            <div class="space-y-5">
-                <!-- Quality & Verfall -->
-                <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl">
-                    <h3 class="font-bold text-slate-200 mb-4 flex items-center gap-2">
-                        <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i> Lagerqualität & Verfall
+            <!-- Detailed Parameter Cards (1 Col) -->
+            <div class="space-y-4">
+                <!-- WWKS2 Tasks & Errors -->
+                <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl">
+                    <h3 class="font-bold text-slate-200 mb-3 flex items-center gap-2 text-sm">
+                        <i data-lucide="cpu" class="w-4 h-4 text-blue-400"></i> Automaten-Auslastung & Queue
                     </h3>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-2.5 bg-slate-900/50 rounded-lg border border-slate-700/50">
-                            <span class="text-xs text-slate-300">Verfall in &le; 90 Tagen</span>
-                            <span id="valExpiring" class="text-sm font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">-- Artikel</span>
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Wartende Tasks (Queue)</span>
+                            <span id="valQueuedTasks" class="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">0 Tasks</span>
                         </div>
-                        <div class="flex items-center justify-between p-2.5 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                        <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Einlagerungen Heute</span>
+                            <span id="valInputs" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">-- Pckg.</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Fehlerquote 24h</span>
-                            <span id="valErrorRate" class="text-sm font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">-- %</span>
-                        </div>
-                        <div class="flex items-center justify-between p-2.5 bg-slate-900/50 rounded-lg border border-slate-700/50">
-                            <span class="text-xs text-slate-300">Aktive Tasks in Queue</span>
-                            <span id="valQueue" class="text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">-- Tasks</span>
+                            <span id="valErrorRate" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">0.00 %</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- WWS Sales Summary -->
-                <div class="bg-slate-800 border border-slate-700 p-5 rounded-xl">
-                    <h3 class="font-bold text-slate-200 mb-3 flex items-center gap-2">
-                        <i data-lucide="receipt" class="w-4 h-4 text-emerald-400"></i> WWS Tagesumsatz
+                <!-- WWS Controlling & Logistics -->
+                <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl">
+                    <h3 class="font-bold text-slate-200 mb-3 flex items-center gap-2 text-sm">
+                        <i data-lucide="truck-delivery" class="w-4 h-4 text-amber-400"></i> WWS Wareneingang & Retouren
                     </h3>
-                    <div class="flex items-baseline justify-between">
-                        <span class="text-xs text-slate-400">Verkäufe (Bons)</span>
-                        <span id="valSalesBons" class="text-lg font-bold text-white">-- Bons</span>
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Wareneingang Heute</span>
+                            <span id="valGoodsReceipts" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">-- Pckg.</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Neinverkäufe (Stockout)</span>
+                            <span id="valMissedSales" class="text-xs font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">-- Anfragen</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Retouren Belege</span>
+                            <span id="valReturns" class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">-- Belege</span>
+                        </div>
                     </div>
-                    <div class="w-full bg-slate-700 h-2 rounded-full mt-2 overflow-hidden">
-                        <div id="valProgressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 50%"></div>
+                </div>
+
+                <!-- Inventory Quality -->
+                <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl">
+                    <h3 class="font-bold text-slate-200 mb-3 flex items-center gap-2 text-sm">
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-emerald-400"></i> Lagerqualität & Verfall
+                    </h3>
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Verfall in &le; 90 Tagen</span>
+                            <span id="valExpiring" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">-- Artikel</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Altbestand &gt; 180 Tage</span>
+                            <span id="valOldStock" class="text-xs font-bold text-slate-400 bg-slate-700/50 px-2 py-0.5 rounded">-- Artikel</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <span class="text-xs text-slate-300">Verkäufe (Bons)</span>
+                            <span id="valSalesBons" class="text-xs font-bold text-white bg-slate-700 px-2 py-0.5 rounded">-- Bons</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -181,7 +230,17 @@
     <script>
         lucide.createIcons();
 
-        // Auto-configure for HTTPS (GitHub Pages) vs HTTP (Local)
+        // Helper for card pulse effect on update
+        function triggerPulse(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.classList.remove('pulse-update');
+                void el.offsetWidth; // trigger reflow
+                el.classList.add('pulse-update');
+            }
+        }
+
+        // Auto-configure HTTPS (GitHub Pages) vs HTTP (Local)
         if (window.location.protocol === 'https:') {
             const protoEl = document.getElementById('protocolSelect');
             const hostEl = document.getElementById('brokerHost');
@@ -202,15 +261,15 @@
                         label: 'Auslagerungsdauer (s)',
                         data: [],
                         borderColor: '#818cf8',
-                        backgroundColor: 'rgba(129, 140, 248, 0.1)',
+                        backgroundColor: 'rgba(129, 140, 248, 0.15)',
                         fill: true,
                         tension: 0.4
                     },
                     {
-                        label: 'Auslagerungen Total',
+                        label: 'Auslagerungen Packungen',
                         data: [],
                         borderColor: '#34d399',
-                        backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                        backgroundColor: 'rgba(52, 211, 153, 0.15)',
                         fill: true,
                         tension: 0.4
                     }
@@ -235,7 +294,6 @@
             let host = document.getElementById('brokerHost') ? document.getElementById('brokerHost').value.trim() : 'broker.hivemq.com';
             let port = document.getElementById('brokerPort') ? parseInt(document.getElementById('brokerPort').value.trim()) : 8884;
 
-            // Force HTTPS/WSS defaults if on HTTPS page to avoid mixed content errors
             if (window.location.protocol === 'https:' && (host === 'localhost' || host === '127.0.0.1')) {
                 host = 'broker.hivemq.com';
                 port = 8884;
@@ -269,6 +327,7 @@
                     if (topic.includes('pharmacy/ks01/metrics')) {
                         if (payload.state) {
                             document.getElementById('valState').innerText = payload.state;
+                            triggerPulse('cardState');
                             if (payload.state !== 'Ready') {
                                 document.getElementById('alertBanner').classList.remove('hidden');
                                 document.getElementById('valAlertStatus').innerText = 'Status: ' + payload.state;
@@ -277,13 +336,21 @@
                             }
                         }
                         if (payload.outputs_today !== undefined) {
-                            document.getElementById('valOutputs').innerHTML = payload.outputs_today + ' <span class="text-sm font-normal text-slate-400">Packungen</span>';
+                            document.getElementById('valOutputs').innerHTML = payload.outputs_today + ' <span class="text-xs font-normal text-slate-400">Pckg.</span>';
+                            triggerPulse('cardOutputs');
+                        }
+                        if (payload.inputs_today !== undefined) {
+                            document.getElementById('valInputs').innerText = payload.inputs_today + ' Pckg.';
                         }
                         if (payload.avg_output_time_s_1h !== undefined) {
-                            document.getElementById('valAvgTime').innerHTML = payload.avg_output_time_s_1h + ' <span class="text-sm font-normal text-slate-400">s</span>';
+                            document.getElementById('valAvgTime').innerHTML = payload.avg_output_time_s_1h + ' <span class="text-xs font-normal text-slate-400">s</span>';
+                            triggerPulse('cardAvgTime');
                         }
                         if (payload.error_rate_24h_pct !== undefined) {
                             document.getElementById('valErrorRate').innerText = payload.error_rate_24h_pct + ' %';
+                        }
+                        if (payload.queued_tasks !== undefined) {
+                            document.getElementById('valQueuedTasks').innerText = payload.queued_tasks + ' Tasks';
                         }
                         if (payload.active_tasks !== undefined) {
                             document.getElementById('valQueue').innerText = payload.active_tasks + ' Tasks';
@@ -291,7 +358,7 @@
 
                         // Chart update
                         const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                        if (telemetryChart.data.labels.length > 10) {
+                        if (telemetryChart.data.labels.length > 12) {
                             telemetryChart.data.labels.shift();
                             telemetryChart.data.datasets[0].data.shift();
                             telemetryChart.data.datasets[1].data.shift();
@@ -300,15 +367,34 @@
                         telemetryChart.data.datasets[0].data.push(payload.avg_output_time_s_1h || 0);
                         telemetryChart.data.datasets[1].data.push(payload.outputs_today || 0);
                         telemetryChart.update();
+
                     } else if (topic.includes('pharmacy/dws/metrics')) {
+                        if (payload.total_sales_amount_cents !== undefined) {
+                            const eur = (payload.total_sales_amount_cents / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+                            document.getElementById('valSalesEur').innerText = eur;
+                            triggerPulse('cardSalesEur');
+                        }
                         if (payload.total_stock_packs !== undefined) {
-                            document.getElementById('valStock').innerHTML = payload.total_stock_packs.toLocaleString('de-DE') + ' <span class="text-sm font-normal text-slate-400">Packungen</span>';
+                            document.getElementById('valStock').innerHTML = payload.total_stock_packs.toLocaleString('de-DE') + ' <span class="text-xs font-normal text-slate-400">Pckg.</span>';
+                            triggerPulse('cardStock');
                         }
                         if (payload.total_sales_count !== undefined) {
                             document.getElementById('valSalesBons').innerText = payload.total_sales_count + ' Bons';
                         }
                         if (payload.expiring_90d_count !== undefined) {
                             document.getElementById('valExpiring').innerText = payload.expiring_90d_count + ' Artikel';
+                        }
+                        if (payload.old_stock_180d_count !== undefined) {
+                            document.getElementById('valOldStock').innerText = payload.old_stock_180d_count + ' Artikel';
+                        }
+                        if (payload.goods_receipts_packs !== undefined) {
+                            document.getElementById('valGoodsReceipts').innerText = payload.goods_receipts_packs + ' Pckg.';
+                        }
+                        if (payload.missed_sales_count !== undefined) {
+                            document.getElementById('valMissedSales').innerText = payload.missed_sales_count + ' Anfragen';
+                        }
+                        if (payload.returns_count !== undefined) {
+                            document.getElementById('valReturns').innerText = payload.returns_count + ' Belege';
                         }
                     }
                 } catch (e) {

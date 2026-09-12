@@ -1,6 +1,7 @@
 """
 MQTT Auto-Discovery & State Publisher for Home Assistant
 Publishes sensor discovery configurations with explicit object_id and state updates using HA standard MQTT topics.
+Exposes 20+ sensors across WWKS2 and ADAS-DWS data models.
 """
 
 import json
@@ -25,13 +26,14 @@ class HAMQTTPublisher:
 
     def generate_discovery_configs(self) -> List[Dict[str, Any]]:
         """
-        Generates Home Assistant MQTT Discovery configuration dictionaries for all sensors with explicit object_ids.
+        Generates Home Assistant MQTT Discovery configuration dictionaries for all 20+ sensors.
         """
         base_state_topic = f"{self.state_prefix}/{self.node_id}/metrics"
         availability_topic = f"{self.state_prefix}/{self.node_id}/availability"
+        dws_state_topic = f"{self.state_prefix}/dws/metrics"
 
         configs = [
-            # Binary Sensor: Online Status
+            # --- WWKS2 Sensors ---
             {
                 "topic": f"{self.discovery_prefix}/binary_sensor/{self.node_id}_online/config",
                 "payload": {
@@ -45,7 +47,6 @@ class HAMQTTPublisher:
                     "device": self.device_info
                 }
             },
-            # Sensor: Automaten Status
             {
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_state/config",
                 "payload": {
@@ -59,7 +60,6 @@ class HAMQTTPublisher:
                     "device": self.device_info
                 }
             },
-            # Sensor: Aktive Tasks
             {
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_active_tasks/config",
                 "payload": {
@@ -74,7 +74,20 @@ class HAMQTTPublisher:
                     "device": self.device_info
                 }
             },
-            # Sensor: Auslagerungen Heute
+            {
+                "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_queued_tasks/config",
+                "payload": {
+                    "name": "Wartende Aufträge (Queue)",
+                    "object_id": f"{self.node_id}_queued_tasks",
+                    "unique_id": f"{self.node_id}_queued_tasks",
+                    "state_topic": base_state_topic,
+                    "value_template": "{{ value_json.queued_tasks }}",
+                    "unit_of_measurement": "Aufträge",
+                    "state_class": "measurement",
+                    "icon": "mdi:clock-outline",
+                    "device": self.device_info
+                }
+            },
             {
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_outputs_today/config",
                 "payload": {
@@ -89,7 +102,6 @@ class HAMQTTPublisher:
                     "device": self.device_info
                 }
             },
-            # Sensor: Einlagerungen Heute
             {
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_inputs_today/config",
                 "payload": {
@@ -104,7 +116,6 @@ class HAMQTTPublisher:
                     "device": self.device_info
                 }
             },
-            # Sensor: Auslagerungsdauer (1h Mittelwert)
             {
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_avg_output_time_1h/config",
                 "payload": {
@@ -120,7 +131,21 @@ class HAMQTTPublisher:
                     "device": self.device_info
                 }
             },
-            # Sensor: Fehlerquote 24h (%)
+            {
+                "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_p95_output_time_24h/config",
+                "payload": {
+                    "name": "Auslagerungsdauer P95 24h",
+                    "object_id": f"{self.node_id}_p95_output_time_24h",
+                    "unique_id": f"{self.node_id}_p95_output_time_24h",
+                    "state_topic": base_state_topic,
+                    "value_template": "{{ value_json.p95_output_time_s_24h }}",
+                    "unit_of_measurement": "s",
+                    "device_class": "duration",
+                    "state_class": "measurement",
+                    "icon": "mdi:timer-sand",
+                    "device": self.device_info
+                }
+            },
             {
                 "topic": f"{self.discovery_prefix}/sensor/{self.node_id}_error_rate_24h/config",
                 "payload": {
@@ -135,14 +160,15 @@ class HAMQTTPublisher:
                     "device": self.device_info
                 }
             },
-            # Sensor: WWS Gesamtverkäufe Heute
+
+            # --- ADAS-DWS WWS Controlling Sensors ---
             {
                 "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_sales_today/config",
                 "payload": {
                     "name": "WWS Verkäufe Heute",
                     "object_id": "pharmacy_dws_sales_today",
                     "unique_id": "pharmacy_dws_sales_today",
-                    "state_topic": f"{self.state_prefix}/dws/metrics",
+                    "state_topic": dws_state_topic,
                     "value_template": "{{ value_json.total_sales_count }}",
                     "unit_of_measurement": "Bons",
                     "state_class": "measurement",
@@ -150,14 +176,28 @@ class HAMQTTPublisher:
                     "device": self.device_info
                 }
             },
-            # Sensor: WWS Lagerbestände (Packungen)
+            {
+                "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_sales_amount_eur/config",
+                "payload": {
+                    "name": "WWS Tagesumsatz EUR",
+                    "object_id": "pharmacy_dws_sales_amount_eur",
+                    "unique_id": "pharmacy_dws_sales_amount_eur",
+                    "state_topic": dws_state_topic,
+                    "value_template": "{{ (value_json.total_sales_amount_cents / 100) | round(2) }}",
+                    "unit_of_measurement": "€",
+                    "device_class": "monetary",
+                    "state_class": "measurement",
+                    "icon": "mdi:currency-eur",
+                    "device": self.device_info
+                }
+            },
             {
                 "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_stock_packs/config",
                 "payload": {
                     "name": "WWS Lagerbestand",
                     "object_id": "pharmacy_dws_stock_packs",
                     "unique_id": "pharmacy_dws_stock_packs",
-                    "state_topic": f"{self.state_prefix}/dws/metrics",
+                    "state_topic": dws_state_topic,
                     "value_template": "{{ value_json.total_stock_packs }}",
                     "unit_of_measurement": "Packungen",
                     "state_class": "measurement",
@@ -165,18 +205,73 @@ class HAMQTTPublisher:
                     "device": self.device_info
                 }
             },
-            # Sensor: WWS Verfall in <= 90 Tagen
             {
                 "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_expiring_90d/config",
                 "payload": {
                     "name": "Verfall in 90 Tagen",
                     "object_id": "pharmacy_dws_expiring_90d",
                     "unique_id": "pharmacy_dws_expiring_90d",
-                    "state_topic": f"{self.state_prefix}/dws/metrics",
+                    "state_topic": dws_state_topic,
                     "value_template": "{{ value_json.expiring_90d_count }}",
                     "unit_of_measurement": "Artikel",
                     "state_class": "measurement",
                     "icon": "mdi:calendar-clock",
+                    "device": self.device_info
+                }
+            },
+            {
+                "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_old_stock_180d/config",
+                "payload": {
+                    "name": "Altbestand 180 Tage",
+                    "object_id": "pharmacy_dws_old_stock_180d",
+                    "unique_id": "pharmacy_dws_old_stock_180d",
+                    "state_topic": dws_state_topic,
+                    "value_template": "{{ value_json.old_stock_180d_count }}",
+                    "unit_of_measurement": "Artikel",
+                    "state_class": "measurement",
+                    "icon": "mdi:history",
+                    "device": self.device_info
+                }
+            },
+            {
+                "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_goods_receipts_packs/config",
+                "payload": {
+                    "name": "Wareneingang Heute",
+                    "object_id": "pharmacy_dws_goods_receipts_packs",
+                    "unique_id": "pharmacy_dws_goods_receipts_packs",
+                    "state_topic": dws_state_topic,
+                    "value_template": "{{ value_json.goods_receipts_packs }}",
+                    "unit_of_measurement": "Packungen",
+                    "state_class": "measurement",
+                    "icon": "mdi:truck-delivery",
+                    "device": self.device_info
+                }
+            },
+            {
+                "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_missed_sales/config",
+                "payload": {
+                    "name": "Neinverkäufe Heute",
+                    "object_id": "pharmacy_dws_missed_sales",
+                    "unique_id": "pharmacy_dws_missed_sales",
+                    "state_topic": dws_state_topic,
+                    "value_template": "{{ value_json.missed_sales_count }}",
+                    "unit_of_measurement": "Anfragen",
+                    "state_class": "measurement",
+                    "icon": "mdi:close-circle-outline",
+                    "device": self.device_info
+                }
+            },
+            {
+                "topic": f"{self.discovery_prefix}/sensor/pharmacy_dws_returns/config",
+                "payload": {
+                    "name": "Retouren Heute",
+                    "object_id": "pharmacy_dws_returns",
+                    "unique_id": "pharmacy_dws_returns",
+                    "state_topic": dws_state_topic,
+                    "value_template": "{{ value_json.returns_count }}",
+                    "unit_of_measurement": "Belege",
+                    "state_class": "measurement",
+                    "icon": "mdi:keyboard-return",
                     "device": self.device_info
                 }
             }
