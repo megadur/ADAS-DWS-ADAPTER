@@ -41,17 +41,17 @@
         
         <!-- Broker Connection Bar -->
         <div class="flex items-center gap-2 bg-slate-900/80 p-2 rounded-lg border border-slate-700 text-xs">
-            <span class="text-slate-400 font-medium">MQTT Broker (NUCTOPF / Cloud):</span>
+            <span class="text-slate-400 font-medium">MQTT Broker:</span>
             <select id="protocolSelect" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded">
-                <option value="wss">wss:// (HTTPS)</option>
+                <option value="wss" selected>wss:// (HTTPS)</option>
                 <option value="ws">ws:// (HTTP)</option>
             </select>
-            <input id="brokerHost" type="text" value="broker.hivemq.com" placeholder="IP / Hostname (z.B. 192.168.178.xx)" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-44 focus:outline-none focus:border-emerald-500">
+            <input id="brokerHost" type="text" value="broker.hivemq.com" placeholder="IP / Hostname" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-40 focus:outline-none focus:border-emerald-500">
             <input id="brokerPort" type="number" value="8884" placeholder="Port" class="bg-slate-800 border border-slate-600 text-white px-2 py-1 rounded w-16 focus:outline-none focus:border-emerald-500">
             <button onclick="connectMQTT()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded font-semibold transition">Verbinden</button>
             <div id="statusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 ml-1">
                 <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
-                <span id="statusText">Getrennt (Demo-Modus)</span>
+                <span id="statusText">Verbinde...</span>
             </div>
         </div>
     </header>
@@ -79,7 +79,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">Automaten Status</span>
                     <i data-lucide="bot" class="w-5 h-5 text-emerald-400"></i>
                 </div>
-                <div id="valState" class="text-2xl font-bold text-emerald-400">Ready</div>
+                <div id="valState" class="text-2xl font-bold text-emerald-400">Warte auf Daten...</div>
                 <p class="text-xs text-slate-400 mt-1">WWKS2 Telemetrie</p>
             </div>
 
@@ -89,7 +89,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">Auslagerungen Heute</span>
                     <i data-lucide="package-up" class="w-5 h-5 text-blue-400"></i>
                 </div>
-                <div id="valOutputs" class="text-2xl font-bold text-white">281 <span class="text-sm font-normal text-slate-400">Packungen</span></div>
+                <div id="valOutputs" class="text-2xl font-bold text-white">-- <span class="text-sm font-normal text-slate-400">Packungen</span></div>
                 <p class="text-xs text-slate-400 mt-1">Tagesdurchsatz Automaten</p>
             </div>
 
@@ -99,7 +99,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">Auslagerungsdauer (1h Ø)</span>
                     <i data-lucide="timer" class="w-5 h-5 text-indigo-400"></i>
                 </div>
-                <div id="valAvgTime" class="text-2xl font-bold text-white">8.4 <span class="text-sm font-normal text-slate-400">s</span></div>
+                <div id="valAvgTime" class="text-2xl font-bold text-white">-- <span class="text-sm font-normal text-slate-400">s</span></div>
                 <p class="text-xs text-slate-400 mt-1">Sollwert: &lt; 15.0 s</p>
             </div>
 
@@ -109,7 +109,7 @@
                     <span class="text-xs font-medium uppercase tracking-wider">WWS Lagerbestand</span>
                     <i data-lucide="boxes" class="w-5 h-5 text-amber-400"></i>
                 </div>
-                <div id="valStock" class="text-2xl font-bold text-white">18.450 <span class="text-sm font-normal text-slate-400">Packungen</span></div>
+                <div id="valStock" class="text-2xl font-bold text-white">-- <span class="text-sm font-normal text-slate-400">Packungen</span></div>
                 <p class="text-xs text-slate-400 mt-1">ADAS-DWS Bestand</p>
             </div>
         </div>
@@ -122,9 +122,9 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h3 class="font-bold text-slate-200">Auslagerungsdauer & Durchsatz Trend (24h)</h3>
-                        <p class="text-xs text-slate-400">Echtzeit-Verlauf aus Ihrem Mosquitto Broker auf NUCTOPF</p>
+                        <p class="text-xs text-slate-400">Echtzeit-Verlauf aus dem HiveMQ / NUCTOPF MQTT Broker</p>
                     </div>
-                    <span id="liveTag" class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded">Simulation</span>
+                    <span id="liveTag" class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded">MQTT Live</span>
                 </div>
                 <div class="h-64">
                     <canvas id="telemetryChart"></canvas>
@@ -141,15 +141,15 @@
                     <div class="space-y-3">
                         <div class="flex items-center justify-between p-2.5 bg-slate-900/50 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Verfall in &le; 90 Tagen</span>
-                            <span id="valExpiring" class="text-sm font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">34 Artikel</span>
+                            <span id="valExpiring" class="text-sm font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">-- Artikel</span>
                         </div>
                         <div class="flex items-center justify-between p-2.5 bg-slate-900/50 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Fehlerquote 24h</span>
-                            <span id="valErrorRate" class="text-sm font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">0.42 %</span>
+                            <span id="valErrorRate" class="text-sm font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">-- %</span>
                         </div>
                         <div class="flex items-center justify-between p-2.5 bg-slate-900/50 rounded-lg border border-slate-700/50">
                             <span class="text-xs text-slate-300">Aktive Tasks in Queue</span>
-                            <span id="valQueue" class="text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">2 Tasks</span>
+                            <span id="valQueue" class="text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">-- Tasks</span>
                         </div>
                     </div>
                 </div>
@@ -161,10 +161,10 @@
                     </h3>
                     <div class="flex items-baseline justify-between">
                         <span class="text-xs text-slate-400">Verkäufe (Bons)</span>
-                        <span id="valSalesBons" class="text-lg font-bold text-white">145 Bons</span>
+                        <span id="valSalesBons" class="text-lg font-bold text-white">-- Bons</span>
                     </div>
                     <div class="w-full bg-slate-700 h-2 rounded-full mt-2 overflow-hidden">
-                        <div id="valProgressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 65%"></div>
+                        <div id="valProgressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 50%"></div>
                     </div>
                 </div>
             </div>
@@ -174,7 +174,7 @@
 
     <!-- Footer -->
     <footer class="bg-slate-800 border-t border-slate-700 px-6 py-3 text-center text-xs text-slate-500">
-        ApoMonitor &copy; 2026 - Hosted on GitHub Pages | Connected to NUCTOPF / Cloud MQTT Broker
+        ApoMonitor &copy; 2026 - Hosted on GitHub Pages | Connected to HiveMQ / NUCTOPF MQTT Broker
     </footer>
 
     <!-- JS Logic -->
@@ -186,19 +186,19 @@
         const telemetryChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+                labels: [],
                 datasets: [
                     {
                         label: 'Auslagerungsdauer (s)',
-                        data: [7.8, 8.2, 9.1, 8.4, 7.9, 8.6, 8.4],
+                        data: [],
                         borderColor: '#818cf8',
                         backgroundColor: 'rgba(129, 140, 248, 0.1)',
                         fill: true,
                         tension: 0.4
                     },
                     {
-                        label: 'Auslagerungen / h',
-                        data: [35, 42, 58, 49, 38, 44, 51],
+                        label: 'Auslagerungen Total',
+                        data: [],
                         borderColor: '#34d399',
                         backgroundColor: 'rgba(52, 211, 153, 0.1)',
                         fill: true,
@@ -264,6 +264,18 @@
                         if (payload.active_tasks !== undefined) {
                             document.getElementById('valQueue').innerText = payload.active_tasks + ' Tasks';
                         }
+
+                        // Chart update
+                        const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        if (telemetryChart.data.labels.length > 10) {
+                            telemetryChart.data.labels.shift();
+                            telemetryChart.data.datasets[0].data.shift();
+                            telemetryChart.data.datasets[1].data.shift();
+                        }
+                        telemetryChart.data.labels.push(nowTime);
+                        telemetryChart.data.datasets[0].data.push(payload.avg_output_time_s_1h || 0);
+                        telemetryChart.data.datasets[1].data.push(payload.outputs_today || 0);
+                        telemetryChart.update();
                     } else if (topic.includes('pharmacy/dws/metrics')) {
                         if (payload.total_stock_packs !== undefined) {
                             document.getElementById('valStock').innerHTML = payload.total_stock_packs.toLocaleString('de-DE') + ' <span class="text-sm font-normal text-slate-400">Packungen</span>';
@@ -298,6 +310,9 @@
                 }
             });
         }
+
+        // Auto-connect on page load
+        window.addEventListener('DOMContentLoaded', connectMQTT);
     </script>
 </body>
 </html>

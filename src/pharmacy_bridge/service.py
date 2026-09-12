@@ -19,9 +19,14 @@ try:
 except ImportError:
     PAHO_AVAILABLE = False
 
-from pharmacy_bridge.adas_parser import parse_adas_xml, ADASMetrics
-from pharmacy_bridge.mqtt_publisher import HAMQTTPublisher
-from pharmacy_bridge.wwks2_bridge import WWKS2TelemetryTracker
+try:
+    from .adas_parser import parse_adas_xml, ADASMetrics
+    from .mqtt_publisher import HAMQTTPublisher
+    from .wwks2_bridge import WWKS2TelemetryTracker
+except ImportError:
+    from pharmacy_bridge.adas_parser import parse_adas_xml, ADASMetrics
+    from pharmacy_bridge.mqtt_publisher import HAMQTTPublisher
+    from pharmacy_bridge.wwks2_bridge import WWKS2TelemetryTracker
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("pharmacy_service")

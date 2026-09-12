@@ -14,9 +14,14 @@ import os
 import random
 import time
 
-from pharmacy_bridge.wwks2_bridge import WWKS2TelemetryTracker
-from pharmacy_bridge.adas_parser import parse_adas_xml
-from pharmacy_bridge.service import PharmacyAdapterService
+try:
+    from .wwks2_bridge import WWKS2TelemetryTracker
+    from .adas_parser import parse_adas_xml
+    from .service import PharmacyAdapterService
+except ImportError:
+    from pharmacy_bridge.wwks2_bridge import WWKS2TelemetryTracker
+    from pharmacy_bridge.adas_parser import parse_adas_xml
+    from pharmacy_bridge.service import PharmacyAdapterService
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("pharmacy_simulator")
