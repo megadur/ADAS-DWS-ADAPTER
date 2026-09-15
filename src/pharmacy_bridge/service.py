@@ -23,10 +23,12 @@ try:
     from .adas_parser import parse_adas_xml, ADASMetrics
     from .mqtt_publisher import HAMQTTPublisher
     from .wwks2_bridge import WWKS2TelemetryTracker
+    from .core.models import FinanceLiquidityMetrics
 except ImportError:
     from pharmacy_bridge.adas_parser import parse_adas_xml, ADASMetrics
     from pharmacy_bridge.mqtt_publisher import HAMQTTPublisher
     from pharmacy_bridge.wwks2_bridge import WWKS2TelemetryTracker
+    from pharmacy_bridge.core.models import FinanceLiquidityMetrics
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("pharmacy_service")
@@ -43,6 +45,7 @@ class PharmacyAdapterService:
         self.wwks2_tracker = WWKS2TelemetryTracker()
         self.mqtt_publisher = HAMQTTPublisher(node_id=node_id)
         self.latest_adas_metrics = ADASMetrics()
+        self.finance_metrics = FinanceLiquidityMetrics()
         self.published_messages = []
 
         self.mqtt_client = None
@@ -118,8 +121,10 @@ class PharmacyAdapterService:
             wwks2_dict["last_successful_output_utc"] = wwks2_dict["last_successful_output_utc"].isoformat()
 
         adas_dict = asdict(self.latest_adas_metrics)
+        core_finance_dict = self.finance_metrics.to_dict()
         
-        self.mqtt_publisher.publish(publish_callback, wwks2_dict, adas_dict)
+        self.mqtt_publisher.publish(publish_callback, wwks2_dict, adas_dict, core_finance_dict)
+
 
 
 def main():

@@ -274,12 +274,87 @@ class HAMQTTPublisher:
                     "icon": "mdi:keyboard-return",
                     "device": self.device_info
                 }
+            },
+
+            # --- Pharmacy Core Finance & 7-Day Liquidity Forecast Sensors ---
+            {
+                "topic": f"{self.discovery_prefix}/sensor/pharmacy_bank_balance/config",
+                "payload": {
+                    "name": "Bankkontostand Heute",
+                    "object_id": "pharmacy_bank_balance",
+                    "unique_id": "pharmacy_bank_balance",
+                    "state_topic": f"{self.state_prefix}/core/metrics",
+                    "value_template": "{{ value_json.bank_balance_eur }}",
+                    "unit_of_measurement": "€",
+                    "device_class": "monetary",
+                    "state_class": "measurement",
+                    "icon": "mdi:bank",
+                    "device": self.device_info
+                }
+            },
+            {
+                "topic": f"{self.discovery_prefix}/sensor/pharmacy_arz_receivables_7d/config",
+                "payload": {
+                    "name": "ARZ Auszahlungen (7T)",
+                    "object_id": "pharmacy_arz_receivables_7d",
+                    "unique_id": "pharmacy_arz_receivables_7d",
+                    "state_topic": f"{self.state_prefix}/core/metrics",
+                    "value_template": "{{ value_json.arz_receivables_7d_eur }}",
+                    "unit_of_measurement": "€",
+                    "device_class": "monetary",
+                    "state_class": "measurement",
+                    "icon": "mdi:cash-plus",
+                    "device": self.device_info
+                }
+            },
+            {
+                "topic": f"{self.discovery_prefix}/sensor/pharmacy_wholesaler_payables_7d/config",
+                "payload": {
+                    "name": "Großhandelsfälligkeiten (7T)",
+                    "object_id": "pharmacy_wholesaler_payables_7d",
+                    "unique_id": "pharmacy_wholesaler_payables_7d",
+                    "state_topic": f"{self.state_prefix}/core/metrics",
+                    "value_template": "{{ value_json.wholesaler_payables_7d_eur }}",
+                    "unit_of_measurement": "€",
+                    "device_class": "monetary",
+                    "state_class": "measurement",
+                    "icon": "mdi:cash-minus",
+                    "device": self.device_info
+                }
+            },
+            {
+                "topic": f"{self.discovery_prefix}/sensor/pharmacy_projected_liquidity_7d/config",
+                "payload": {
+                    "name": "Prognostizierte Liquidität (7T)",
+                    "object_id": "pharmacy_projected_liquidity_7d",
+                    "unique_id": "pharmacy_projected_liquidity_7d",
+                    "state_topic": f"{self.state_prefix}/core/metrics",
+                    "value_template": "{{ value_json.projected_liquidity_7d_eur }}",
+                    "unit_of_measurement": "€",
+                    "device_class": "monetary",
+                    "state_class": "measurement",
+                    "icon": "mdi:chart-timeline-variant",
+                    "device": self.device_info
+                }
+            },
+            {
+                "topic": f"{self.discovery_prefix}/binary_sensor/pharmacy_liquidity_warning/config",
+                "payload": {
+                    "name": "Liquiditätsengpass Warnung",
+                    "object_id": "pharmacy_liquidity_warning",
+                    "unique_id": "pharmacy_liquidity_warning",
+                    "state_topic": f"{self.state_prefix}/core/metrics",
+                    "value_template": "{{ 'ON' if value_json.is_liquidity_warning else 'OFF' }}",
+                    "device_class": "problem",
+                    "icon": "mdi:alert-decagram",
+                    "device": self.device_info
+                }
             }
         ]
 
         return configs
 
-    def publish(self, publish_func: Callable[[str, str, bool], None], wwks2_state_dict: Dict[str, Any], adas_metrics_dict: Dict[str, Any]):
+    def publish(self, publish_func: Callable[[str, str, bool], None], wwks2_state_dict: Dict[str, Any], adas_metrics_dict: Dict[str, Any], core_finance_dict: Optional[Dict[str, Any]] = None):
         """
         Publishes discovery configs and state telemetry to MQTT using the provided callback.
         """
@@ -301,3 +376,9 @@ class HAMQTTPublisher:
         # Publish ADAS-DWS Metrics State
         adas_state_topic = f"{self.state_prefix}/dws/metrics"
         publish_func(adas_state_topic, json.dumps(adas_metrics_dict, ensure_ascii=False), True)
+
+        # Publish Pharmacy Core Finance Metrics State
+        if core_finance_dict:
+            core_state_topic = f"{self.state_prefix}/core/metrics"
+            publish_func(core_state_topic, json.dumps(core_finance_dict, ensure_ascii=False), True)
+

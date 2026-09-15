@@ -240,7 +240,13 @@ class PharmacySimulator:
         # 9. Expiration & Old Stock Minor Variation
         self.expiring_90d = max(10, self.expiring_90d + random.choice([-1, 0, 1]))
 
-        # 10. Generate ADAS XML file
+        # 10. Simulate 7-Day Liquidity Forecast Fluctuations
+        # Bank balance rises with sales, ARZ fluctuates, wholesaler payables shift on receipts
+        self.service.finance_metrics.bank_balance_cents = 12000000 + (self.sales_cents // 2)
+        self.service.finance_metrics.arz_receivables_7d_cents = 14500000 + (math.sin(self.step_counter / 4.0) * 500000)
+        self.service.finance_metrics.wholesaler_payables_7d_cents = 19000000 + (self.goods_receipts_cents // 4)
+
+        # 11. Generate ADAS XML file
         timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         xml_path = os.path.join(self.inbox_dir, f"ADAS_DAT_1234567_{timestamp_str}.xml")
         self.generate_mock_adas_xml(xml_path)
@@ -260,8 +266,9 @@ class PharmacySimulator:
         self.service.latest_adas_metrics.missed_sales_count = self.missed_sales_count
         self.service.latest_adas_metrics.missed_sales_requested_packs = self.missed_sales_packs
 
-        # 11. Run service update cycle
+        # 12. Run service update cycle
         self.service.update()
+
 
 
 def main():

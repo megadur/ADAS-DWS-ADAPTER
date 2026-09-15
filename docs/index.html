@@ -216,8 +216,34 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Pharmacy Core: 7-Day Liquidity Forecast -->
+                <div id="cardLiquidity" class="bg-slate-800 border border-indigo-500/30 p-4 rounded-xl col-span-1 md:col-span-3">
+                    <h3 class="font-bold text-slate-200 mb-3 flex items-center gap-2 text-sm">
+                        <i data-lucide="wallet" class="w-4 h-4 text-indigo-400"></i> 7-Tage Liquiditätsvorschau (Pharmacy Core)
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <div class="text-xs text-slate-400 mb-1">Bankkontostand Heute</div>
+                            <div id="valBankBalance" class="text-base font-bold text-slate-200">120.000,00 €</div>
+                        </div>
+                        <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <div class="text-xs text-slate-400 mb-1">+ ARZ Auszahlungen (7T)</div>
+                            <div id="valArzReceivables" class="text-base font-bold text-emerald-400">+145.000,00 €</div>
+                        </div>
+                        <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/50">
+                            <div class="text-xs text-slate-400 mb-1">- Großhandelsfälligkeiten (7T)</div>
+                            <div id="valWholesalerPayables" class="text-base font-bold text-rose-400">-190.000,00 €</div>
+                        </div>
+                        <div class="p-3 bg-indigo-950/40 rounded-lg border border-indigo-500/40">
+                            <div class="text-xs text-indigo-300 font-medium mb-1">= Forecast Liquidität (7T)</div>
+                            <div id="valProjectedLiquidity" class="text-lg font-black text-indigo-300">40.000,00 €</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
 
     </main>
 
@@ -432,11 +458,26 @@
                         if (payload.returns_count !== undefined) {
                             document.getElementById('valReturns').innerText = payload.returns_count + ' Belege';
                         }
+                    } else if (topic.includes('pharmacy/core/metrics')) {
+                        if (payload.bank_balance_eur !== undefined) {
+                            document.getElementById('valBankBalance').innerText = payload.bank_balance_eur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+                        }
+                        if (payload.arz_receivables_7d_eur !== undefined) {
+                            document.getElementById('valArzReceivables').innerText = '+' + payload.arz_receivables_7d_eur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+                        }
+                        if (payload.wholesaler_payables_7d_eur !== undefined) {
+                            document.getElementById('valWholesalerPayables').innerText = '-' + payload.wholesaler_payables_7d_eur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+                        }
+                        if (payload.projected_liquidity_7d_eur !== undefined) {
+                            document.getElementById('valProjectedLiquidity').innerText = payload.projected_liquidity_7d_eur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+                            triggerPulse('cardLiquidity');
+                        }
                     }
                 } catch (e) {
                     console.log('Error parsing MQTT payload:', e);
                 }
             };
+
 
             mqttClient.connect({
                 useSSL: useSSL,

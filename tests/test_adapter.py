@@ -134,6 +134,25 @@ class TestSimulator(unittest.TestCase):
         os.rmdir(inbox_dir)
 
 
+class TestPharmacyCore(unittest.TestCase):
+    def test_finance_liquidity_calculation(self):
+        from pharmacy_bridge.core.models import FinanceLiquidityMetrics
+        fin = FinanceLiquidityMetrics(
+            bank_balance_cents=12000000,          # 120,000 €
+            arz_receivables_7d_cents=14500000,    # 145,000 €
+            wholesaler_payables_7d_cents=19000000,# 190,000 €
+            other_expenses_7d_cents=3500000       # 35,000 €
+        )
+        self.assertEqual(fin.projected_liquidity_7d_cents, 4000000) # 40,000 €
+        self.assertEqual(fin.projected_liquidity_7d_eur, 40000.0)
+        self.assertFalse(fin.is_liquidity_warning)
+
+        # Test warning state when receivables drop
+        fin.arz_receivables_7d_cents = 12000000 # Drop by 25k -> projected = 15k (< 25k)
+        self.assertTrue(fin.is_liquidity_warning)
+
+
 if __name__ == "__main__":
     unittest.main()
+
 

@@ -121,3 +121,30 @@ views:
               - entity: sensor.apotheken_kommissionierer_ks01_wws_verkaufe_heute
                 name: Tagesverkäufe Kumuliert
                 icon: mdi:cash-register
+
+      # 💶 ABSCHNITT 3: PHARMACY CORE - 7-TAGE LIQUIDITÄTSVORSCHAU
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## 💶 7-Tage Liquiditätsvorschau (Pharmacy Core)"
+
+          - type: entities
+            title: Finanz- & Liquiditätsbilanz
+            show_header_toggle: false
+            entities:
+              - entity: sensor.apotheken_kommissionierer_ks01_bankkontostand_heute
+                name: Bankkontostand Heute
+                icon: mdi:bank
+              - entity: sensor.apotheken_kommissionierer_ks01_arz_auszahlungen_7t
+                name: + Erwartete ARZ Auszahlungen (7T)
+                icon: mdi:cash-plus
+              - entity: sensor.apotheken_kommissionierer_ks01_grosshandelsfalligkeiten_7t
+                name: - Großhandelsfälligkeiten (7T)
+                icon: mdi:cash-minus
+              - entity: sensor.apotheken_kommissionierer_ks01_prognostizierte_liquiditat_7t
+                name: = Prognostizierte Liquidität (in 7 Tagen)
+                icon: mdi:chart-timeline-variant
+              - entity: binary_sensor.apotheken_kommissionierer_ks01_liquiditatsengpass_warnung
+                name: Liquiditätsengpass Warnung
+                icon: mdi:alert-decagram
+
